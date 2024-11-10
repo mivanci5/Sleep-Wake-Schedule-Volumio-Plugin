@@ -11,7 +11,7 @@
       "icon": "fa-moon-o",
       "onSave": {
         "type": "controller",
-        "endpoint": "system_controller/sleep-wake-plugin",
+        "endpoint": "system_controller/sleep-wake-schedule-volumio-plugin",
         "method": "saveOptions"
       },
       "saveButton": {
@@ -26,7 +26,7 @@
           "element": "input",
           "type": "text",
           "label": "Sleep Time",
-          "value": "22:00",
+          "value": "01:00",
           "placeholder": "HH:MM (e.g., 22:00)"
         }
       ]
@@ -38,7 +38,7 @@
       "icon": "fa-sun-o",
       "onSave": {
         "type": "controller",
-        "endpoint": "system_controller/sleep-wake-plugin",
+        "endpoint": "system_controller/sleep-wake-schedule-volumio-plugin",
         "method": "saveOptions"
       },
       "saveButton": {
@@ -55,7 +55,7 @@
           "element": "input",
           "type": "text",
           "label": "Wake Time",
-          "value": "07:00",
+          "value": "06:00",
           "placeholder": "HH:MM (e.g., 07:00)"
         },
         {
