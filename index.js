@@ -90,16 +90,27 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   this.writeLog('Saving options. Data received: ' + JSON.stringify(data));
 
   // Save and apply settings
-  this.config.set('sleepTime', data.sleepTime);
-  this.config.set('wakeTime', data.wakeTime);
-  this.config.set('startVolume', parseInt(data.startVolume, 10));
-  this.config.set('playlist', data.playlist);
+  if (data.sleepTime) {
+    this.config.set('sleepTime', data.sleepTime);
+    this.sleepTime = data.sleepTime;
+    clearTimeout(this.sleepTimer);
+    this.scheduleSleep();
+  }
+  if (data.wakeTime) {
+    this.config.set('wakeTime', data.wakeTime);
+    this.wakeTime = data.wakeTime;
+    clearTimeout(this.wakeTimer);
+    this.scheduleWake();
+  }
+  if (data.startVolume !== undefined) {
+    this.config.set('startVolume', parseInt(data.startVolume, 10));
+    this.startVolume = parseInt(data.startVolume, 10);
+  }
+  if (data.playlist) {
+    this.config.set('playlist', data.playlist);
+    this.playlist = data.playlist;
+  }
   this.config.save();
-
-  clearTimeout(this.sleepTimer);
-  clearTimeout(this.wakeTimer);
-  this.scheduleSleep();
-  this.scheduleWake();
 
   this.commandRouter.pushToastMessage('success', 'Settings Saved', 'Your settings have been saved.');
   this.logger.info('SleepWakePlugin - Settings saved');
@@ -118,6 +129,7 @@ SleepWakePlugin.prototype.loadConfig = function () {
 };
 
 SleepWakePlugin.prototype.scheduleSleep = function () {
+  if (!this.sleepTime) return;
   const sleepTime = this.parseTime(this.sleepTime);
   if (!sleepTime) return;
 
@@ -135,6 +147,7 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
 };
 
 SleepWakePlugin.prototype.scheduleWake = function () {
+  if (!this.wakeTime) return;
   const wakeTime = this.parseTime(this.wakeTime);
   if (!wakeTime) return;
 
