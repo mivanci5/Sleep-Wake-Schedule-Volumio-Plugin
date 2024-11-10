@@ -1,6 +1,4 @@
 
-Got it! Here's the updated README.md file with your username and project name.
-
 Volumio Sleep-Wake Schedule Plugin
 Overview
 The Volumio Sleep-Wake Schedule Plugin is designed to enhance your Volumio experience by adding sleep and wake-up automation features. This plugin allows you to schedule when Volumio should fade out the volume and stop playback at night and when it should gradually increase the volume and start a specific playlist in the morning.
