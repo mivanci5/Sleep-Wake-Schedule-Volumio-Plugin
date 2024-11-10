@@ -1,10 +1,10 @@
 {
-  "name": "sleep-wake-plugin",
+  "name": "sleep-wake-schedule-volumio-plugin",
   "version": "1.0.0",
-  "description": "Plugin za postupno smanjivanje i povećavanje glasnoće u određeno vrijeme.",
+  "description": "Plugin for sleep and wake with volume fade out/in",
   "main": "index.js",
-  "author": "Vaše Ime",
-  "license": "ISC",
+  "author": "Mario Ivancic",
+  "license": "MIT",
   "dependencies": {
     "fs-extra": "^10.0.0",
     "kew": "^0.7.0",
@@ -26,7 +26,7 @@
     "os": [
       "buster"
     ],
-    "details": "Plugin za postupno smanjivanje i povećavanje glasnoće u određeno vrijeme.",
+    "details": "Plugin for sleep and wake with volume fade out/in",
     "changelog": "Prva verzija za Volumio 3."
   }
 }
