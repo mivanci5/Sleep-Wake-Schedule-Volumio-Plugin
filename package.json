@@ -1,6 +1,6 @@
 {
   "name": "sleep-wake-schedule-volumio-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Plugin for sleep and wake with volume fade out/in",
   "main": "index.js",
   "author": "Mario Ivancic",
