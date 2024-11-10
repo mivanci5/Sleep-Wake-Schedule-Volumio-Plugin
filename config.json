@@ -1,0 +1,18 @@
+{
+  "sleepTime": {
+    "type": "string",
+    "value": "01:00"
+  },
+  "wakeTime": {
+    "type": "string",
+    "value": "05:50"
+  },
+  "startVolume": {
+    "type": "string",
+    "value": "40"
+  },
+  "playlist": {
+    "type": "string",
+    "value": "wakeup"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "sleep-wake-plugin",
+  "version": "1.0.0",
+  "description": "Plugin za postupno smanjivanje i povećavanje glasnoće u određeno vrijeme.",
+  "main": "index.js",
+  "author": "Vaše Ime",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^10.0.0",
+    "kew": "^0.7.0",
+    "v-conf": "^1.4.0"
+  },
+  "engines": {
+    "node": ">=14.15.4 <15.0.0",
+    "volumio": ">=3.0.0 <4.0.0"
+  },
+  "volumio_info": {
+    "prettyName": "Sleep Wake Plugin",
+    "icon": "fa-clock-o",
+    "plugin_type": "system_controller",
+    "boot_priority": 10,
+    "architectures": [
+      "amd64",
+      "armhf"
+    ],
+    "os": [
+      "buster"
+    ],
+    "details": "Plugin za postupno smanjivanje i povećavanje glasnoće u određeno vrijeme.",
+    "changelog": "Prva verzija za Volumio 3."
+  }
+}

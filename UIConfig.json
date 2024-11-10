@@ -1,0 +1,80 @@
+{
+  "page": {
+    "label": "Sleep Wake Plugin Configuration",
+    "icon": "fa-clock-o"
+  },
+  "sections": [
+    {
+      "id": "sleep_settings",
+      "element": "section",
+      "label": "Night Mode",
+      "icon": "fa-moon-o",
+      "onSave": {
+        "type": "controller",
+        "endpoint": "system_controller/sleep-wake-plugin",
+        "method": "saveOptions"
+      },
+      "saveButton": {
+        "label": "Save",
+        "data": [
+          "sleepTime"
+        ]
+      },
+      "content": [
+        {
+          "id": "sleepTime",
+          "element": "input",
+          "type": "text",
+          "label": "Sleep Time",
+          "value": "22:00",
+          "placeholder": "HH:MM (e.g., 22:00)"
+        }
+      ]
+    },
+    {
+      "id": "wake_settings",
+      "element": "section",
+      "label": "Morning Mode",
+      "icon": "fa-sun-o",
+      "onSave": {
+        "type": "controller",
+        "endpoint": "system_controller/sleep-wake-plugin",
+        "method": "saveOptions"
+      },
+      "saveButton": {
+        "label": "Save",
+        "data": [
+          "wakeTime",
+          "startVolume",
+          "playlist"
+        ]
+      },
+      "content": [
+        {
+          "id": "wakeTime",
+          "element": "input",
+          "type": "text",
+          "label": "Wake Time",
+          "value": "07:00",
+          "placeholder": "HH:MM (e.g., 07:00)"
+        },
+        {
+          "id": "startVolume",
+          "element": "input",
+          "type": "text",
+          "label": "Start Volume",
+          "value": "35",
+          "placeholder": "volume"
+        },
+        {
+          "id": "playlist",
+          "element": "input",
+          "type": "text",
+          "label": "Playlist Name",
+          "value": "",
+          "placeholder": "Enter playlist name"
+        }
+      ]
+    }
+  ]
+}
