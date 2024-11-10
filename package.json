@@ -15,7 +15,7 @@
     "volumio": ">=3.0.0 <4.0.0"
   },
   "volumio_info": {
-    "prettyName": "Sleep Wake Plugin",
+    "prettyName": "Sleep Wake Schedule Plugin",
     "icon": "fa-clock-o",
     "plugin_type": "system_controller",
     "boot_priority": 10,
