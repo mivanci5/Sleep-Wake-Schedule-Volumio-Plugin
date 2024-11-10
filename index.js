@@ -3,6 +3,8 @@
 const libQ = require('kew');
 const fs = require('fs-extra');
 const path = require('path');
+const config = new (require('v-conf'))();
+const os = require('os');
 const http = require('http');
 
 module.exports = SleepWakePlugin;
@@ -22,7 +24,6 @@ SleepWakePlugin.prototype.onVolumioStart = function () {
   this.writeLog('Plugin starting...');
 
   const configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
-  this.config = new (require('v-conf'))();
   this.config.loadFile(configFile);
 
   return libQ.resolve();
@@ -31,6 +32,7 @@ SleepWakePlugin.prototype.onVolumioStart = function () {
 SleepWakePlugin.prototype.onStart = function () {
   this.logger.info('SleepWakePlugin - onStart');
   this.writeLog('Plugin started.');
+
   this.loadConfig();
   this.scheduleSleep();
   this.scheduleWake();
@@ -59,26 +61,25 @@ SleepWakePlugin.prototype.getUIConfig = function () {
   this.logger.info('SleepWakePlugin - getUIConfig');
   this.writeLog('Loading UI configuration.');
 
-  fs.readJson(path.join(__dirname, 'UIConfig.json'), (err, uiconf) => {
+  this.loadConfig();
+  const uiconfPath = path.join(__dirname, 'UIConfig.json');
+
+  fs.readJson(uiconfPath, (err, uiconf) => {
     if (err) {
-      this.logger.error('SleepWakePlugin - Error reading UIConfig.json: ' + err);
-      this.writeLog('Error reading UIConfig.json: ' + err);
-      defer.reject(err);
+      this.handleError('Error reading UIConfig.json', err, defer);
       return;
     }
 
     try {
-      uiconf.sections[0].content[0].value = this.config.get('sleepTime', '22:00');
-      uiconf.sections[1].content[0].value = this.config.get('wakeTime', '07:00');
-      uiconf.sections[1].content[1].value = this.config.get('startVolume', 20);
-      uiconf.sections[1].content[2].value = this.config.get('playlist', '');
+      uiconf.sections[0].content[0].value = this.config.get('sleepTime') || '22:00';
+      uiconf.sections[1].content[0].value = this.config.get('wakeTime') || '07:00';
+      uiconf.sections[1].content[1].value = this.config.get('startVolume') || 20;
+      uiconf.sections[1].content[2].value = this.config.get('playlist') || '';
 
       this.writeLog('UI configuration loaded successfully.');
       defer.resolve(uiconf);
     } catch (parseError) {
-      this.logger.error('SleepWakePlugin - Error parsing UIConfig.json: ' + parseError);
-      this.writeLog('Error parsing UIConfig.json: ' + parseError);
-      defer.reject(parseError);
+      this.handleError('Error parsing UIConfig.json', parseError, defer);
     }
   });
 
@@ -89,93 +90,77 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   this.logger.info('SleepWakePlugin - saveOptions');
   this.writeLog('Saving options. Data received: ' + JSON.stringify(data));
 
-  // Save and apply settings
-  if (data.sleepTime) {
+  // Save sleep settings
+  if (data.sleepTime !== undefined) {
     this.config.set('sleepTime', data.sleepTime);
-    this.sleepTime = data.sleepTime;
-    clearTimeout(this.sleepTimer);
+    this.writeLog('Set sleepTime to ' + data.sleepTime);
     this.scheduleSleep();
   }
-  if (data.wakeTime) {
-    this.config.set('wakeTime', data.wakeTime);
-    this.wakeTime = data.wakeTime;
-    clearTimeout(this.wakeTimer);
-    this.scheduleWake();
-  }
-  if (data.startVolume !== undefined) {
-    this.config.set('startVolume', parseInt(data.startVolume, 10));
-    this.startVolume = parseInt(data.startVolume, 10);
-  }
-  if (data.playlist) {
-    this.config.set('playlist', data.playlist);
-    this.playlist = data.playlist;
-  }
-  this.config.save();
 
+  // Save wake settings
+  if (data.wakeTime !== undefined) this.config.set('wakeTime', data.wakeTime);
+  if (data.startVolume !== undefined) this.config.set('startVolume', parseInt(data.startVolume, 10));
+  if (data.playlist !== undefined) this.config.set('playlist', data.playlist);
+  this.writeLog('Wake settings updated.');
+  this.scheduleWake();
+
+  this.config.save();
   this.commandRouter.pushToastMessage('success', 'Settings Saved', 'Your settings have been saved.');
-  this.logger.info('SleepWakePlugin - Settings saved');
   this.writeLog('Settings saved.');
 
   return libQ.resolve();
 };
 
 SleepWakePlugin.prototype.loadConfig = function () {
-  this.sleepTime = this.config.get('sleepTime', '22:00');
-  this.wakeTime = this.config.get('wakeTime', '07:00');
-  this.startVolume = parseInt(this.config.get('startVolume', 20), 10);
-  this.playlist = this.config.get('playlist', '');
+  this.sleepTime = this.config.get('sleepTime') || '22:00';
+  this.wakeTime = this.config.get('wakeTime') || '07:00';
+  this.startVolume = parseInt(this.config.get('startVolume'), 10) || 20;
+  this.playlist = this.config.get('playlist') || '';
 
-  this.writeLog(`Configuration loaded: sleepTime: ${this.sleepTime}, wakeTime: ${this.wakeTime}, startVolume: ${this.startVolume}, playlist: ${this.playlist}`);
+  this.writeLog('Configuration loaded:');
+  this.writeLog(`sleepTime: ${this.sleepTime}, wakeTime: ${this.wakeTime}, startVolume: ${this.startVolume}, playlist: ${this.playlist}`);
 };
 
 SleepWakePlugin.prototype.scheduleSleep = function () {
-  if (!this.sleepTime) return;
   const sleepTime = this.parseTime(this.sleepTime);
   if (!sleepTime) return;
 
   const now = new Date();
   if (sleepTime <= now) sleepTime.setDate(sleepTime.getDate() + 1);
-
   const timeUntilSleep = sleepTime - now;
-  clearTimeout(this.sleepTimer);
 
-  this.sleepTimer = setTimeout(() => {
-    this.logger.info('SleepWakePlugin - Sleep timer triggered');
-    this.writeLog('Sleep timer triggered.');
-    this.fadeOutVolume();
-  }, timeUntilSleep);
+  clearTimeout(this.sleepTimer);
+  this.sleepTimer = setTimeout(() => this.fadeOutVolume(), timeUntilSleep);
+  this.writeLog(`Sleep scheduled in ${timeUntilSleep} milliseconds`);
 };
 
 SleepWakePlugin.prototype.scheduleWake = function () {
-  if (!this.wakeTime) return;
   const wakeTime = this.parseTime(this.wakeTime);
   if (!wakeTime) return;
 
   const now = new Date();
   if (wakeTime <= now) wakeTime.setDate(wakeTime.getDate() + 1);
-
   const timeUntilWake = wakeTime - now;
-  clearTimeout(this.wakeTimer);
 
-  this.wakeTimer = setTimeout(() => {
-    this.logger.info('SleepWakePlugin - Wake timer triggered');
-    this.writeLog('Wake timer triggered.');
-    this.startPlaylist();
-  }, timeUntilWake);
+  clearTimeout(this.wakeTimer);
+  this.wakeTimer = setTimeout(() => this.startPlaylist(), timeUntilWake);
+  this.writeLog(`Wake scheduled in ${timeUntilWake} milliseconds`);
+};
+
+SleepWakePlugin.prototype.parseTime = function (timeStr) {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  if (isNaN(hours) || isNaN(minutes)) {
+    this.writeLog('Invalid time format: ' + timeStr);
+    return null;
+  }
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
 };
 
 SleepWakePlugin.prototype.fadeOutVolume = function () {
   if (this.isWaking) return;
   this.isSleeping = true;
-
-  this.logger.info('SleepWakePlugin - Starting fade out volume');
-  this.writeLog('Starting fade out volume');
-
-  this.adjustVolume(-1, () => {
-    this.sendRestCommand('/api/v1/commands/?cmd=stop', () => {
-      this.isSleeping = false;
-    });
-  });
+  this.adjustVolume(-1, 'fadeOutVolume');
 };
 
 SleepWakePlugin.prototype.startPlaylist = function () {
@@ -184,40 +169,34 @@ SleepWakePlugin.prototype.startPlaylist = function () {
     this.isSleeping = false;
   }
   this.isWaking = true;
-
-  this.logger.info('SleepWakePlugin - Starting playlist');
-  this.writeLog('Starting playlist');
-
   this.sendRestCommand(`/api/v1/commands/?cmd=volume&volume=${this.startVolume}`, () => {
     this.sendRestCommand(`/api/v1/commands/?cmd=playplaylist&name=${encodeURIComponent(this.playlist)}`, () => {
-      this.adjustVolume(1, () => {
-        this.isWaking = false;
-      });
+      this.adjustVolume(1, 'startPlaylist');
     });
   });
 };
 
-SleepWakePlugin.prototype.adjustVolume = function (delta, callback) {
-  let step = 0;
+SleepWakePlugin.prototype.adjustVolume = function (stepChange, caller) {
   const steps = 10;
   const interval = 2 * 60 * 1000;
+  let step = 0;
 
   const adjust = () => {
-    if (step >= steps) {
-      callback();
-      return;
-    }
-
     this.getCurrentVolume((err, currentVolume) => {
-      if (err) return;
-      const newVolume = Math.min(Math.max(currentVolume + delta, 0), 100);
+      if (err) {
+        this.handleError(`Error getting current volume in ${caller}`, err);
+        return;
+      }
+      const newVolume = Math.max(0, Math.min(currentVolume + stepChange, 100));
       this.sendRestCommand(`/api/v1/commands/?cmd=volume&volume=${newVolume}`, () => {
-        step++;
-        setTimeout(adjust, interval);
+        if (++step < steps) setTimeout(adjust, interval);
+        else {
+          this.isSleeping = false;
+          this.isWaking = false;
+        }
       });
     });
   };
-
   adjust();
 };
 
@@ -229,19 +208,14 @@ SleepWakePlugin.prototype.sendRestCommand = function (endpoint, callback) {
     method: 'GET',
   };
 
-  http.request(options, (res) => {
-    res.setEncoding('utf8');
+  const req = http.request(options, (res) => {
     let responseData = '';
-    res.on('data', (chunk) => {
-      responseData += chunk;
-    });
-    res.on('end', () => {
-      callback(null, responseData);
-    });
-  }).on('error', (e) => {
-    this.logger.error(`Problem with request: ${e.message}`);
-    callback(e);
-  }).end();
+    res.on('data', (chunk) => (responseData += chunk));
+    res.on('end', () => callback && callback(null, responseData));
+  });
+
+  req.on('error', (e) => this.handleError('Problem with request: ', e));
+  req.end();
 };
 
 SleepWakePlugin.prototype.getCurrentVolume = function (callback) {
@@ -256,12 +230,13 @@ SleepWakePlugin.prototype.getCurrentVolume = function (callback) {
   });
 };
 
-SleepWakePlugin.prototype.parseTime = function (timeStr) {
-  const [hours, minutes] = timeStr.split(':').map(Number);
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+SleepWakePlugin.prototype.handleError = function (message, err, defer) {
+  this.logger.error(message + ': ' + err);
+  this.writeLog(message + ': ' + err);
+  if (defer) defer.reject(new Error());
 };
 
 SleepWakePlugin.prototype.writeLog = function (message) {
-  fs.appendFileSync(this.logFile, `[${new Date().toISOString()}] ${message}${require('os').EOL}`, { encoding: 'utf8' });
+  const logMessage = `[${new Date().toISOString()}] ${message}${os.EOL}`;
+  fs.appendFileSync(this.logFile, logMessage, { encoding: 'utf8' });
 };
