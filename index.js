@@ -81,7 +81,7 @@ SleepWakePlugin.prototype.onStop = function () {
 };
 
 SleepWakePlugin.prototype.getUIConfig = function () {
-  self.writeLog('Function getUIConfig');
+ 
   const self = this;
   const defer = libQ.defer();
 
