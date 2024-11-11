@@ -23,9 +23,9 @@ SleepWakePlugin.prototype.onVolumioStart = function () {
   this.logger.info('SleepWakePlugin - onVolumioStart');
   this.writeLog('Plugin starting...');
 
-  const configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
+  const configFile = this.context.pluginManager.getConfigurationFile(this.context, 'config.json');
   this.config = new (require('v-conf'))();
-  this.config.loadFile(configFile);
+  this.config.loadFile(this.context.pluginManager.getConfigurationFile(this.context, 'config.json'));
 
   return libQ.resolve();
 };
