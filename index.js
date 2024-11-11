@@ -39,7 +39,7 @@ SleepWakePlugin.prototype.onVolumioStart = function () {
 };
 
 SleepWakePlugin.prototype.onStart = function () {
-  self.writeLog('Function onStart');
+ 
   const self = this;
   const defer = libQ.defer();
 
@@ -55,7 +55,7 @@ SleepWakePlugin.prototype.onStart = function () {
 };
 
 SleepWakePlugin.prototype.onStop = function () {
-  self.writeLog('Function onStop');
+  
   const self = this;
   const defer = libQ.defer();
 
@@ -123,7 +123,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
 };
 
 SleepWakePlugin.prototype.saveOptions = function (data) {
-  self.writeLog('Function saveOptions');
+  
   const self = this;
 
   self.logger.info('SleepWakePlugin - saveOptions');
@@ -222,7 +222,7 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
 };
 
 SleepWakePlugin.prototype.loadConfig = function () {
-  self.writeLog('Function loadConfig');
+ 
   const self = this;
 
   self.sleepTime = self.config.get('sleepTime') || '22:00';
@@ -246,7 +246,7 @@ SleepWakePlugin.prototype.loadConfig = function () {
 };
 
 SleepWakePlugin.prototype.scheduleSleep = function () {
-  self.writeLog('Function scheduleSleep');
+ 
   const self = this;
 
   const now = new Date();
@@ -284,7 +284,7 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
 };
 
 SleepWakePlugin.prototype.scheduleWake = function () {
-  self.writeLog('Function scheduleWake');
+ 
   const self = this;
 
   const now = new Date();
@@ -357,7 +357,7 @@ SleepWakePlugin.prototype.parseTime = function (timeStr) {
 };
 
 SleepWakePlugin.prototype.sendRestCommand = function (endpoint, callback) {
-  self.writeLog('Function sendRestCommand');
+  
   const self = this;
   const options = {
     hostname: 'localhost',
@@ -396,7 +396,7 @@ SleepWakePlugin.prototype.sendRestCommand = function (endpoint, callback) {
 };
 
 SleepWakePlugin.prototype.getCurrentVolume = function (callback) {
-self.writeLog('Function getCurrentVolume');
+
   const self = this;
   const options = {
     hostname: 'localhost',
@@ -521,7 +521,7 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
 };
 
 SleepWakePlugin.prototype.startPlaylist = function () {
-  self.writeLog('Function startPlaylist');
+ 
   const self = this;
 
   // If already sleeping, interrupt sleep
