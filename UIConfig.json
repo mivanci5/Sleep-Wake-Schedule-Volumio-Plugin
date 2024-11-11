@@ -36,7 +36,7 @@
           "element": "input",
           "type": "number",
           "label": "How Much Volume to Decrease",
-          "value": "10",
+          "value": 10,
           "placeholder": "volume decrese"
         },
         {
@@ -44,7 +44,7 @@
           "element": "input",
           "type": "number",
           "label": "Minutes to Fade Volume",
-          "value": "10",
+          "value": 10,
           "placeholder": "minutes"
         }
       ]
@@ -99,7 +99,7 @@
           "element": "input",
           "type": "number",
           "label": "How Much Volume to Increase",
-          "value": "10",
+          "value": 10,
           "placeholder": "volume increase"
         },
         {
@@ -107,7 +107,7 @@
           "element": "input",
           "type": "number",
           "label": "Minutes to Ramp Volume",
-          "value": "10",
+          "value": 10,
           "placeholder": "minutes"
         }
       ]
