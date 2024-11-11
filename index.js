@@ -14,7 +14,9 @@ function SleepWakePlugin(context) {
   this.commandRouter = context.coreCommand;
   this.logger = context.logger;
   this.configManager = context.configManager;
+
   this.logFile = path.join(__dirname, 'sleep-wake-plugin.log');
+
   this.isSleeping = false;
   this.isWaking = false;
 }
@@ -23,9 +25,9 @@ SleepWakePlugin.prototype.onVolumioStart = function () {
   this.logger.info('SleepWakePlugin - onVolumioStart');
   this.writeLog('Plugin starting...');
 
-  const configFile = this.context.pluginManager.getConfigurationFile(this.context, 'config.json');
+  const configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
   this.config = new (require('v-conf'))();
-  this.config.loadFile(this.context.pluginManager.getConfigurationFile(this.context, 'config.json'));
+  this.config.loadFile(configFile);
 
   return libQ.resolve();
 };
@@ -45,11 +47,8 @@ SleepWakePlugin.prototype.onStop = function () {
   this.logger.info('SleepWakePlugin - onStop');
   this.writeLog('Plugin stopped.');
 
-  // Clear timers
-  clearTimeout(this.sleepTimer);
-  clearTimeout(this.wakeTimer);
+  this.clearTimers();
 
-  // Reset state flags
   this.isSleeping = false;
   this.isWaking = false;
 
@@ -72,11 +71,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
     }
 
     try {
-      uiconf.sections[0].content[0].value = this.config.get('sleepTime');
-      uiconf.sections[1].content[0].value = this.config.get('wakeTime');
-      uiconf.sections[1].content[1].value = this.config.get('startVolume');
-      uiconf.sections[1].content[2].value = this.config.get('playlist');
-
+      this.setUIConfigValues(uiconf);
       this.writeLog('UI configuration loaded successfully.');
       defer.resolve(uiconf);
     } catch (parseError) {
@@ -91,19 +86,7 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   this.logger.info('SleepWakePlugin - saveOptions');
   this.writeLog('Saving options. Data received: ' + JSON.stringify(data));
 
-  // Save sleep settings
-  if (data.sleepTime !== undefined) {
-    this.config.set('sleepTime', data.sleepTime);
-    this.writeLog('Set sleepTime to ' + data.sleepTime);
-    this.scheduleSleep();
-  }
-
-  // Save wake settings
-  if (data.wakeTime !== undefined) this.config.set('wakeTime', data.wakeTime);
-  if (data.startVolume !== undefined) this.config.set('startVolume', parseInt(data.startVolume, 10));
-  if (data.playlist !== undefined) this.config.set('playlist', data.playlist);
-  this.writeLog('Wake settings updated.');
-  this.scheduleWake();
+  this.updateConfig(data);
 
   this.config.save();
   this.commandRouter.pushToastMessage('success', 'Settings Saved', 'Your settings have been saved.');
@@ -113,10 +96,10 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
 };
 
 SleepWakePlugin.prototype.loadConfig = function () {
-  this.sleepTime = this.config.get('sleepTime');
-  this.wakeTime = this.config.get('wakeTime');
-  this.startVolume = parseInt(this.config.get('startVolume'), 10);
-  this.playlist = this.config.get('playlist');
+  this.sleepTime = this.config.get('sleepTime') || '22:00';
+  this.wakeTime = this.config.get('wakeTime') || '07:00';
+  this.startVolume = parseInt(this.config.get('startVolume'), 10) || 20;
+  this.playlist = this.config.get('playlist') || '';
 
   this.writeLog('Configuration loaded:');
   this.writeLog(`sleepTime: ${this.sleepTime}, wakeTime: ${this.wakeTime}, startVolume: ${this.startVolume}, playlist: ${this.playlist}`);
@@ -124,52 +107,127 @@ SleepWakePlugin.prototype.loadConfig = function () {
 
 SleepWakePlugin.prototype.scheduleSleep = function () {
   const sleepTime = this.parseTime(this.sleepTime);
-  if (!sleepTime) return;
 
-  const now = new Date();
-  if (sleepTime <= now) sleepTime.setDate(sleepTime.getDate() + 1);
-  const timeUntilSleep = sleepTime - now;
+  if (!sleepTime) {
+    this.handleError('Invalid sleep time. Sleep will not be scheduled.');
+    return;
+  }
 
-  clearTimeout(this.sleepTimer);
-  this.sleepTimer = setTimeout(() => this.fadeOutVolume(), timeUntilSleep);
-  this.writeLog(`Sleep scheduled in ${timeUntilSleep} milliseconds`);
+  this.writeLog('Scheduling sleep...');
+  this.scheduleTimer('sleepTimer', sleepTime, this.fadeOutVolume.bind(this));
 };
 
 SleepWakePlugin.prototype.scheduleWake = function () {
   const wakeTime = this.parseTime(this.wakeTime);
-  if (!wakeTime) return;
 
-  const now = new Date();
-  if (wakeTime <= now) wakeTime.setDate(wakeTime.getDate() + 1);
-  const timeUntilWake = wakeTime - now;
+  if (!wakeTime) {
+    this.handleError('Invalid wake time. Wake will not be scheduled.');
+    return;
+  }
 
-  clearTimeout(this.wakeTimer);
-  this.wakeTimer = setTimeout(() => this.startPlaylist(), timeUntilWake);
-  this.writeLog(`Wake scheduled in ${timeUntilWake} milliseconds`);
+  this.writeLog('Scheduling wake...');
+  this.scheduleTimer('wakeTimer', wakeTime, this.startPlaylist.bind(this));
 };
 
 SleepWakePlugin.prototype.parseTime = function (timeStr) {
-  const [hours, minutes] = timeStr.split(':').map(Number);
-  if (isNaN(hours) || isNaN(minutes)) {
-    this.writeLog('Invalid time format: ' + timeStr);
+  this.writeLog('Parsing time from string: ' + timeStr);
+  let parsedTime;
+
+  if (timeStr.includes('T')) {
+    parsedTime = new Date(timeStr);
+  } else if (timeStr.includes(':')) {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const now = new Date();
+    parsedTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+  } else {
+    this.handleError('Unrecognized time format: ' + timeStr);
     return null;
   }
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+
+  if (isNaN(parsedTime.getTime())) {
+    this.handleError('Failed to parse time from string: ' + timeStr);
+    return null;
+  }
+
+  if (timeStr.includes('Z')) {
+    parsedTime = new Date(parsedTime.getTime() + parsedTime.getTimezoneOffset() * 60000);
+  }
+
+  this.writeLog('Parsed time: ' + parsedTime);
+  return parsedTime;
+};
+
+SleepWakePlugin.prototype.sendRestCommand = function (endpoint, callback) {
+  const options = {
+    hostname: 'localhost',
+    port: 3000,
+    path: endpoint,
+    method: 'GET',
+  };
+
+  this.logger.info(`Sending REST command to ${options.hostname}:${options.port}${options.path}`);
+  this.writeLog(`Sending REST command to ${options.hostname}:${options.port}${options.path}`);
+
+  const req = http.request(options, (res) => {
+    res.setEncoding('utf8');
+    let responseData = '';
+    res.on('data', (chunk) => {
+      responseData += chunk;
+    });
+    res.on('end', () => {
+      this.writeLog(`Received response: ${responseData}`);
+      if (callback) {
+        callback(null, responseData);
+      }
+    });
+  });
+
+  req.on('error', (e) => {
+    this.handleError(`Problem with request: ${e.message}`, e, callback);
+  });
+
+  req.end();
+};
+
+SleepWakePlugin.prototype.getCurrentVolume = function (callback) {
+  this.sendRestCommand('/api/v1/getState', (err, response) => {
+    if (err) {
+      return callback(err);
+    }
+    try {
+      const data = JSON.parse(response);
+      callback(null, parseInt(data.volume, 10));
+    } catch (error) {
+      this.handleError('Error parsing volume', error, callback);
+    }
+  });
 };
 
 SleepWakePlugin.prototype.fadeOutVolume = function () {
-  if (this.isWaking) return;
+  if (this.isWaking) {
+    this.handleError('Cannot start sleep during wake-up process.');
+    return;
+  }
+
   this.isSleeping = true;
+  this.logger.info('SleepWakePlugin - Starting fade out volume');
+  this.writeLog('Starting fade out volume');
+
   this.adjustVolume(-1, 'fadeOutVolume');
 };
 
 SleepWakePlugin.prototype.startPlaylist = function () {
   if (this.isSleeping) {
-    clearTimeout(this.sleepTimer);
+    this.logger.info('SleepWakePlugin - Interrupting sleep to start wake-up.');
+    this.writeLog('Interrupting sleep to start wake-up.');
+    this.clearTimer('sleepTimer');
     this.isSleeping = false;
   }
+
   this.isWaking = true;
+  this.logger.info('SleepWakePlugin - Starting playlist');
+  this.writeLog('Starting playlist');
+
   this.sendRestCommand(`/api/v1/commands/?cmd=volume&volume=${this.startVolume}`, () => {
     this.sendRestCommand(`/api/v1/commands/?cmd=playplaylist&name=${encodeURIComponent(this.playlist)}`, () => {
       this.adjustVolume(1, 'startPlaylist');
@@ -190,8 +248,9 @@ SleepWakePlugin.prototype.adjustVolume = function (stepChange, caller) {
       }
       const newVolume = Math.max(0, Math.min(currentVolume + stepChange, 100));
       this.sendRestCommand(`/api/v1/commands/?cmd=volume&volume=${newVolume}`, () => {
-        if (++step < steps) setTimeout(adjust, interval);
-        else {
+        if (++step < steps) {
+          setTimeout(adjust, interval);
+        } else {
           this.isSleeping = false;
           this.isWaking = false;
         }
@@ -201,40 +260,81 @@ SleepWakePlugin.prototype.adjustVolume = function (stepChange, caller) {
   adjust();
 };
 
-SleepWakePlugin.prototype.sendRestCommand = function (endpoint, callback) {
-  const options = {
-    hostname: 'localhost',
-    port: 3000,
-    path: endpoint,
-    method: 'GET',
-  };
-
-  const req = http.request(options, (res) => {
-    let responseData = '';
-    res.on('data', (chunk) => (responseData += chunk));
-    res.on('end', () => callback && callback(null, responseData));
-  });
-
-  req.on('error', (e) => this.handleError('Problem with request: ', e));
-  req.end();
+SleepWakePlugin.prototype.clearTimers = function () {
+  this.clearTimer('sleepTimer');
+  this.clearTimer('wakeTimer');
 };
 
-SleepWakePlugin.prototype.getCurrentVolume = function (callback) {
-  this.sendRestCommand('/api/v1/getState', (err, response) => {
-    if (err) return callback(err);
-    try {
-      const data = JSON.parse(response);
-      callback(null, parseInt(data.volume, 10));
-    } catch (error) {
-      callback(error);
+SleepWakePlugin.prototype.clearTimer = function (timerName) {
+  if (this[timerName]) {
+    clearTimeout(this[timerName]);
+    this.writeLog(`Cleared ${timerName}.`);
+  }
+};
+
+SleepWakePlugin.prototype.scheduleTimer = function (timerName, targetTime, action) {
+  const now = new Date();
+  if (targetTime <= now) targetTime.setDate(targetTime.getDate() + 1);
+  const timeUntilAction = targetTime - now;
+
+  this.clearTimer(timerName);
+  this.logger.info(`SleepWakePlugin - ${timerName} scheduled in ${timeUntilAction} milliseconds`);
+  this.writeLog(`${timerName} scheduled in ${timeUntilAction} milliseconds`);
+
+  this[timerName] = setTimeout(action, timeUntilAction);
+};
+
+SleepWakePlugin.prototype.setUIConfigValues = function (uiconf) {
+  uiconf.sections[0].content[0].value = this.config.get('sleepTime') || '22:00';
+  uiconf.sections[1].content[0].value = this.config.get('wakeTime') || '07:00';
+  uiconf.sections[1].content[1].value = this.config.get('startVolume') || 20;
+  uiconf.sections[1].content[2].value = this.config.get('playlist') || '';
+};
+
+SleepWakePlugin.prototype.updateConfig = function (data) {
+  if (data.sleepTime !== undefined) {
+    this.config.set('sleepTime', data.sleepTime);
+    this.sleepTime = data.sleepTime;
+    this.writeLog('Set sleepTime to ' + data.sleepTime);
+    this.scheduleSleep();
+  }
+  if (data.wakeTime !== undefined) {
+    this.config.set('wakeTime', data.wakeTime);
+    this.wakeTime = data.wakeTime;
+    this.writeLog('Set wakeTime to ' + data.wakeTime);
+    this.scheduleWake();
+  }
+  if (data.startVolume !== undefined) {
+    const volumeValue = parseInt(data.startVolume, 10);
+    if (!isNaN(volumeValue)) {
+      this.config.set('startVolume', volumeValue);
+      this.startVolume = volumeValue;
+      this.writeLog('Set startVolume to ' + volumeValue);
     }
-  });
+  }
+  if (data.playlist !== undefined) {
+    this.config.set('playlist', data.playlist);
+    this.playlist = data.playlist;
+    this.writeLog('Set playlist to ' + data.playlist);
+  }
 };
 
 SleepWakePlugin.prototype.handleError = function (message, err, defer) {
-  this.logger.error(message + ': ' + err);
-  this.writeLog(message + ': ' + err);
-  if (defer) defer.reject(new Error());
+  this.logger.error(message + (err ? ': ' + err : ''));
+  this.writeLog(message + (err ? ': ' + err : ''));
+  if (defer) defer.reject(new Error(message));
+};
+
+SleepWakePlugin.prototype.getConfigurationFiles = function () {
+  return ['config.json'];
+};
+
+SleepWakePlugin.prototype.getConf = function (varName) {
+  return this.config.get(varName);
+};
+
+SleepWakePlugin.prototype.setConf = function (varName, varValue) {
+  this.config.set(varName, varValue);
 };
 
 SleepWakePlugin.prototype.writeLog = function (message) {
