@@ -320,4 +320,4 @@ SleepWakePlugin.prototype.updateConfig = function (data) {
   if (data.playlist !== undefined) {
     this.config.set('playlist', data.playlist);
     this.playlist = data.playlist;
-    this.writeLog('Set playlist to ' + data.play
+    this.writeLog('Set playlist to ' + data.playlist);
