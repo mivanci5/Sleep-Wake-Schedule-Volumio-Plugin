@@ -119,7 +119,8 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
       this.writeLog('Skipping sleep as wake-up process is ongoing.');
       return;
     }
-    this.clearTimers();
+    this.isSleeping = true;
+    this.isWaking = false;
     this.fadeOutVolume();
   });
 };
@@ -136,10 +137,9 @@ SleepWakePlugin.prototype.scheduleWake = function () {
   this.scheduleTimer('wakeTimer', wakeTime, () => {
     if (this.isSleeping) {
       this.writeLog('Interrupting sleep to start wake-up.');
-      this.clearTimers();
       this.isSleeping = false;
     }
-    this.clearTimers();
+    this.isWaking = true;
     this.startPlaylist();
   });
 };
@@ -219,7 +219,6 @@ SleepWakePlugin.prototype.getCurrentVolume = function (callback) {
 };
 
 SleepWakePlugin.prototype.fadeOutVolume = function () {
-  this.isSleeping = true;
   this.logger.info('SleepWakePlugin - Starting fade out volume');
   this.writeLog('Starting fade out volume');
 
@@ -227,7 +226,6 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
 };
 
 SleepWakePlugin.prototype.startPlaylist = function () {
-  this.isWaking = true;
   this.logger.info('SleepWakePlugin - Starting playlist');
   this.writeLog('Starting playlist');
 
@@ -254,8 +252,12 @@ SleepWakePlugin.prototype.adjustVolume = function (stepChange, caller) {
         if (++step < steps) {
           setTimeout(adjust, interval);
         } else {
-          this.isSleeping = false;
-          this.isWaking = false;
+          if (caller === 'fadeOutVolume') {
+            this.isSleeping = false;
+          }
+          if (caller === 'startPlaylist') {
+            this.isWaking = false;
+          }
         }
       });
     });
@@ -318,29 +320,4 @@ SleepWakePlugin.prototype.updateConfig = function (data) {
   if (data.playlist !== undefined) {
     this.config.set('playlist', data.playlist);
     this.playlist = data.playlist;
-    this.writeLog('Set playlist to ' + data.playlist);
-  }
-};
-
-SleepWakePlugin.prototype.handleError = function (message, err, defer) {
-  this.logger.error(message + (err ? ': ' + err : ''));
-  this.writeLog(message + (err ? ': ' + err : ''));
-  if (defer) defer.reject(new Error(message));
-};
-
-SleepWakePlugin.prototype.getConfigurationFiles = function () {
-  return ['config.json'];
-};
-
-SleepWakePlugin.prototype.getConf = function (varName) {
-  return this.config.get(varName);
-};
-
-SleepWakePlugin.prototype.setConf = function (varName, varValue) {
-  this.config.set(varName, varValue);
-};
-
-SleepWakePlugin.prototype.writeLog = function (message) {
-  const logMessage = `[${new Date().toISOString()}] ${message}${os.EOL}`;
-  fs.appendFileSync(this.logFile, logMessage, { encoding: 'utf8' });
-};
+    this.writeLog('Set playlist to ' + data.play
