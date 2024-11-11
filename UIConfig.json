@@ -36,12 +36,16 @@
           "element": "input",
           "type": "number",
           "label": "Volume Decrease per Step",
+          "value": "10",
+          "placeholder": "volume decrese"
         },
         {
           "id": "minutesFade",
           "element": "input",
           "type": "number",
           "label": "Minutes to Fade",
+          "value": "10",
+          "placeholder": "minutes"
         }
       ]
     },
@@ -95,12 +99,16 @@
           "element": "input",
           "type": "number",
           "label": "Volume Increase per Step",
+          "value": "10",
+          "placeholder": "volume increase"
         },
         {
           "id": "minutesRamp",
           "element": "input",
           "type": "number",
           "label": "Minutes to Ramp",
+          "value": "10",
+          "placeholder": "minutes"
         }
       ]
     }
