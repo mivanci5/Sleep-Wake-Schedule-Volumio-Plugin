@@ -11,7 +11,7 @@
       "icon": "fa-moon-o",
       "onSave": {
         "type": "controller",
-        "endpoint": "system_controller/sleep-wake-plugin",
+        "endpoint": "system_controller/sleep-wake-schedule-volumio-plugin",
         "method": "saveOptions"
       },
       "saveButton": {
@@ -56,7 +56,7 @@
       "icon": "fa-sun-o",
       "onSave": {
         "type": "controller",
-        "endpoint": "system_controller/sleep-wake-plugin",
+        "endpoint": "system_controller/sleep-wake-schedule-volumio-plugin",
         "method": "saveOptions"
       },
       "saveButton": {
