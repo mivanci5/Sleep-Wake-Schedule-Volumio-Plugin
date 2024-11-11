@@ -322,7 +322,7 @@ SleepWakePlugin.prototype.scheduleWake = function () {
 };
 
 SleepWakePlugin.prototype.parseTime = function (timeStr) {
-  self.writeLog('Function parseTime');
+ 
   const self = this;
   self.writeLog('Parsing time from string: ' + timeStr);
   let parsedTime;
@@ -439,7 +439,7 @@ self.writeLog('Function getCurrentVolume');
 };
 
 SleepWakePlugin.prototype.fadeOutVolume = function () {
-  self.writeLog('Function fadeOutVolume');
+
   const self = this;
 
   // If already waking up, do not proceed with sleep
