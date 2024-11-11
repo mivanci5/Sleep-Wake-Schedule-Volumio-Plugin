@@ -140,10 +140,10 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   const minutesRamp = data['minutesRamp'];
 
   // Save sleep settings
-  self.writeLog('Saving sleep setings');
-  
+  self.writeLog('Saving sleep settings');
+
   if (sleepTime !== undefined) {
-    self.config.set('data default = sleepTime', sleepTime);
+    self.config.set('sleepTime', sleepTime); // Corrected
     self.sleepTime = sleepTime;
     self.writeLog('Set sleepTime to ' + sleepTime);
     if (self.sleepTimer) {
@@ -154,25 +154,25 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   }
 
   if (volumeDecrease !== undefined) {
-    self.config.set('data default = volumeDecrease', volumeDecrease);
+    self.config.set('volumeDecrease', volumeDecrease); // Corrected
     self.volumeDecrease = volumeDecrease;
     self.writeLog('Set volumeDecrease to ' + volumeDecrease);
   }
 
   if (minutesFade !== undefined) {
-    self.config.set('data default = minutesFade', minutesFade);
+    self.config.set('minutesFade', minutesFade); // Corrected
     self.minutesFade = minutesFade;
     self.writeLog('Set minutesFade to ' + minutesFade);
   }
 
   // Save wake settings
-  self.writeLog('Save wake settings');
-  
+  self.writeLog('Saving wake settings');
+
   if (wakeTime !== undefined || startVolume !== undefined || playlist !== undefined || volumeIncrease !== undefined || minutesRamp !== undefined) {
     if (wakeTime !== undefined) {
-      self.config.set('data default = wakeTime', wakeTime);
+      self.config.set('wakeTime', wakeTime); // Corrected
       self.wakeTime = wakeTime;
-      self.writeLog('data default = Set wakeTime to ' + wakeTime);
+      self.writeLog('Set wakeTime to ' + wakeTime);
     }
     if (startVolume !== undefined) {
       const volumeValue = parseInt(startVolume, 10);
@@ -180,23 +180,23 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
         self.logger.error('SleepWakePlugin - Invalid startVolume value: ' + JSON.stringify(startVolume));
         self.writeLog('Invalid startVolume value: ' + JSON.stringify(startVolume));
       } else {
-        self.config.set('startVolume', volumeValue);
+        self.config.set('startVolume', volumeValue); // Corrected
         self.startVolume = volumeValue;
         self.writeLog('Set startVolume to ' + volumeValue);
       }
     }
     if (playlist !== undefined) {
-      self.config.set('playlist', playlist);
+      self.config.set('playlist', playlist); // Corrected
       self.playlist = playlist;
       self.writeLog('Set playlist to ' + playlist);
     }
     if (volumeIncrease !== undefined) {
-      self.config.set('volumeIncrease', volumeIncrease);
+      self.config.set('volumeIncrease', volumeIncrease); // Corrected
       self.volumeIncrease = volumeIncrease;
       self.writeLog('Set volumeIncrease to ' + volumeIncrease);
     }
     if (minutesRamp !== undefined) {
-      self.config.set('minutesRamp', minutesRamp);
+      self.config.set('minutesRamp', minutesRamp); // Corrected
       self.minutesRamp = minutesRamp;
       self.writeLog('Set minutesRamp to ' + minutesRamp);
     }
@@ -206,6 +206,7 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
     }
     self.scheduleWake();
   }
+
 
   // Save configuration to disk
   self.writeLog('Save configuration on disk');
