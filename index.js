@@ -137,7 +137,7 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
 
   // Save sleep settings
   if (sleepTime !== undefined) {
-    self.config.set('sleepTime', sleepTime);
+    self.config.set('data default = sleepTime', sleepTime);
     self.sleepTime = sleepTime;
     self.writeLog('Set sleepTime to ' + sleepTime);
     if (self.sleepTimer) {
@@ -148,13 +148,13 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   }
 
   if (volumeDecrease !== undefined) {
-    self.config.set('volumeDecrease', volumeDecrease);
+    self.config.set('data default = volumeDecrease', volumeDecrease);
     self.volumeDecrease = volumeDecrease;
     self.writeLog('Set volumeDecrease to ' + volumeDecrease);
   }
 
   if (minutesFade !== undefined) {
-    self.config.set('minutesFade', minutesFade);
+    self.config.set('data default = minutesFade', minutesFade);
     self.minutesFade = minutesFade;
     self.writeLog('Set minutesFade to ' + minutesFade);
   }
@@ -162,9 +162,9 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   // Save wake settings
   if (wakeTime !== undefined || startVolume !== undefined || playlist !== undefined || volumeIncrease !== undefined || minutesRamp !== undefined) {
     if (wakeTime !== undefined) {
-      self.config.set('wakeTime', wakeTime);
+      self.config.set('data default = wakeTime', wakeTime);
       self.wakeTime = wakeTime;
-      self.writeLog('Set wakeTime to ' + wakeTime);
+      self.writeLog('data default = Set wakeTime to ' + wakeTime);
     }
     if (startVolume !== undefined) {
       const volumeValue = parseInt(startVolume, 10);
