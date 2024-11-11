@@ -114,7 +114,13 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
   }
 
   this.writeLog('Scheduling sleep...');
-  this.scheduleTimer('sleepTimer', sleepTime, this.fadeOutVolume.bind(this));
+  this.scheduleTimer('sleepTimer', sleepTime, () => {
+    if (this.isWaking) {
+      this.writeLog('Skipping sleep as wake-up process is ongoing.');
+      return;
+    }
+    this.fadeOutVolume();
+  });
 };
 
 SleepWakePlugin.prototype.scheduleWake = function () {
@@ -126,7 +132,14 @@ SleepWakePlugin.prototype.scheduleWake = function () {
   }
 
   this.writeLog('Scheduling wake...');
-  this.scheduleTimer('wakeTimer', wakeTime, this.startPlaylist.bind(this));
+  this.scheduleTimer('wakeTimer', wakeTime, () => {
+    if (this.isSleeping) {
+      this.writeLog('Interrupting sleep to start wake-up.');
+      this.clearTimer('sleepTimer');
+      this.isSleeping = false;
+    }
+    this.startPlaylist();
+  });
 };
 
 SleepWakePlugin.prototype.parseTime = function (timeStr) {
@@ -204,11 +217,6 @@ SleepWakePlugin.prototype.getCurrentVolume = function (callback) {
 };
 
 SleepWakePlugin.prototype.fadeOutVolume = function () {
-  if (this.isWaking) {
-    this.handleError('Cannot start sleep during wake-up process.');
-    return;
-  }
-
   this.isSleeping = true;
   this.logger.info('SleepWakePlugin - Starting fade out volume');
   this.writeLog('Starting fade out volume');
@@ -217,13 +225,6 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
 };
 
 SleepWakePlugin.prototype.startPlaylist = function () {
-  if (this.isSleeping) {
-    this.logger.info('SleepWakePlugin - Interrupting sleep to start wake-up.');
-    this.writeLog('Interrupting sleep to start wake-up.');
-    this.clearTimer('sleepTimer');
-    this.isSleeping = false;
-  }
-
   this.isWaking = true;
   this.logger.info('SleepWakePlugin - Starting playlist');
   this.writeLog('Starting playlist');
