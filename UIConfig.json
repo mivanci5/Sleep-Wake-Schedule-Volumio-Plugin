@@ -1,6 +1,6 @@
 {
   "page": {
-    "label": "Sleep Wake Plugin Configuration",
+    "label": "Sleep Wake Schedule Plugin Configuration",
     "icon": "fa-clock-o"
   },
   "sections": [
@@ -27,7 +27,7 @@
           "id": "sleepTime",
           "element": "input",
           "type": "text",
-          "label": "Sleep Time",
+          "label": "Sleep Time (HH:MM)",
           "value": "22:00",
           "placeholder": "HH:MM (e.g., 22:00)"
         },
@@ -35,7 +35,7 @@
           "id": "volumeDecrease",
           "element": "input",
           "type": "number",
-          "label": "Volume Decrease per Step",
+          "label": "How Much Volume to Decrease",
           "value": "10",
           "placeholder": "volume decrese"
         },
@@ -43,7 +43,7 @@
           "id": "minutesFade",
           "element": "input",
           "type": "number",
-          "label": "Minutes to Fade",
+          "label": "Minutes to Fade Volume",
           "value": "10",
           "placeholder": "minutes"
         }
@@ -71,7 +71,7 @@
       },
       "content": [
         {
-          "id": "wakeTime",
+          "id": "wakeTime (HH:MM)",
           "element": "input",
           "type": "text",
           "label": "Wake Time",
@@ -98,7 +98,7 @@
           "id": "volumeIncrease",
           "element": "input",
           "type": "number",
-          "label": "Volume Increase per Step",
+          "label": "How Much Volume to Increase",
           "value": "10",
           "placeholder": "volume increase"
         },
@@ -106,7 +106,7 @@
           "id": "minutesRamp",
           "element": "input",
           "type": "number",
-          "label": "Minutes to Ramp",
+          "label": "Minutes to Ramp Volume",
           "value": "10",
           "placeholder": "minutes"
         }
