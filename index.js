@@ -97,7 +97,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
     }
 
     try {
-      uiconf.sections[0].content[0].value = self.config.get('sleepTime') || '22:00';
+      uiconf.sections[0].content[0].value = self.config.get('sleepTime') || '23:00';
       uiconf.sections[1].content[0].value = self.config.get('wakeTime') || '07:00';
       uiconf.sections[1].content[1].value = self.config.get('startVolume') || 20;
       uiconf.sections[1].content[2].value = self.config.get('playlist') || '';
