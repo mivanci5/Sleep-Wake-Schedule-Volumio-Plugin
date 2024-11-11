@@ -119,6 +119,7 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
       this.writeLog('Skipping sleep as wake-up process is ongoing.');
       return;
     }
+    this.clearTimers();
     this.fadeOutVolume();
   });
 };
@@ -135,9 +136,10 @@ SleepWakePlugin.prototype.scheduleWake = function () {
   this.scheduleTimer('wakeTimer', wakeTime, () => {
     if (this.isSleeping) {
       this.writeLog('Interrupting sleep to start wake-up.');
-      this.clearTimer('sleepTimer');
+      this.clearTimers();
       this.isSleeping = false;
     }
+    this.clearTimers();
     this.startPlaylist();
   });
 };
