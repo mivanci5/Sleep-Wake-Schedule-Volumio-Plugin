@@ -71,10 +71,10 @@
       },
       "content": [
         {
-          "id": "wakeTime (HH:MM)",
+          "id": "wakeTime",
           "element": "input",
           "type": "text",
-          "label": "Wake Time",
+          "label": "Wake Time (HH:MM)",
           "value": "07:00",
           "placeholder": "HH:MM (e.g., 07:00)"
         },
