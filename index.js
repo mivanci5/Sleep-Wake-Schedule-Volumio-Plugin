@@ -110,6 +110,16 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       uiconf.sections[1].content[3].value = self.config.get('volumeIncrease') || 1;
       uiconf.sections[1].content[4].value = self.config.get('minutesRamp') || 10;
 
+            // Additional log to verify values retrieved from config
+      self.writeLog('Configuration values loaded for UI: sleepTime: ' + uiconf.sections[0].content[0].value);
+      self.writeLog('volumeDecrease: ' + uiconf.sections[0].content[1].value);
+      self.writeLog('minutesFade: ' + uiconf.sections[0].content[2].value);
+      self.writeLog('wakeTime: ' + uiconf.sections[1].content[0].value);
+      self.writeLog('startVolume: ' + uiconf.sections[1].content[1].value);
+      self.writeLog('playlist: ' + uiconf.sections[1].content[2].value);
+      self.writeLog('volumeIncrease: ' + uiconf.sections[1].content[3].value);
+      self.writeLog('minutesRamp: ' + uiconf.sections[1].content[4].value);
+      
       self.writeLog('UI configuration loaded successfully.');
       defer.resolve(uiconf);
     } catch (parseError) {
