@@ -1,11 +1,11 @@
 {
   "sleepTime": {
     "type": "string",
-    "value": "01:00"
+    "value": "02:00"
   },
   "wakeTime": {
     "type": "string",
-    "value": "06:00"
+    "value": "07:00"
   },
   "startVolume": {
     "type": "string",
@@ -21,7 +21,7 @@
   },
   "minutesFade": {
     "type": "number",
-    "value": "10"
+    "value": "5"
   },
   "volumeIncrease": {
     "type": "number",
@@ -29,6 +29,6 @@
   },
   "minutesRamp": {
     "type": "number",
-    "value": "10"
+    "value": "5"
   }
 }
