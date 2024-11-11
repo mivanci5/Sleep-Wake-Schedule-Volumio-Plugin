@@ -546,7 +546,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
   //const interval = 2 * 60 * 1000; // 2 minutes in milliseconds
   //let step = 0;
 
-  const steps = Math.ceil(self.minutesRamp * 60 * 1000 / (self.volumeIncrease * 1000)); // dodano za proracun koraka po korisniku
+  const steps = Math.ceil(self.volumeIncrease); // dodano za proracun koraka po korisniku
   const interval = (self.minutesRamp * 60 * 1000) / steps; //pretvoreno u milisekunde
   let step = 0;
   
