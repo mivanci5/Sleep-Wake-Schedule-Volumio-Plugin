@@ -71,10 +71,10 @@ SleepWakePlugin.prototype.getUIConfig = function () {
     }
 
     try {
-      uiconf.sections[0].content[0].value = this.config.get('sleepTime') || '22:00';
-      uiconf.sections[1].content[0].value = this.config.get('wakeTime') || '07:00';
-      uiconf.sections[1].content[1].value = this.config.get('startVolume') || 20;
-      uiconf.sections[1].content[2].value = this.config.get('playlist') || '';
+      uiconf.sections[0].content[0].value = this.config.get('sleepTime');
+      uiconf.sections[1].content[0].value = this.config.get('wakeTime');
+      uiconf.sections[1].content[1].value = this.config.get('startVolume');
+      uiconf.sections[1].content[2].value = this.config.get('playlist');
 
       this.writeLog('UI configuration loaded successfully.');
       defer.resolve(uiconf);
@@ -112,10 +112,10 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
 };
 
 SleepWakePlugin.prototype.loadConfig = function () {
-  this.sleepTime = this.config.get('sleepTime') || '22:00';
-  this.wakeTime = this.config.get('wakeTime') || '07:00';
-  this.startVolume = parseInt(this.config.get('startVolume'), 10) || 20;
-  this.playlist = this.config.get('playlist') || '';
+  this.sleepTime = this.config.get('sleepTime');
+  this.wakeTime = this.config.get('wakeTime');
+  this.startVolume = parseInt(this.config.get('startVolume'), 10);
+  this.playlist = this.config.get('playlist');
 
   this.writeLog('Configuration loaded:');
   this.writeLog(`sleepTime: ${this.sleepTime}, wakeTime: ${this.wakeTime}, startVolume: ${this.startVolume}, playlist: ${this.playlist}`);
