@@ -20,26 +20,15 @@ Installation Instructions
 
 Follow these steps to install the Sleep-Wake Schedule Plugin for Volumio:
 
-Clone the Repository
-
-git clone https://github.com/mivanci5/Sleep-Wake-Schedule-Volumio-Plugin.git
+*Clone the Repository:*    git clone https://github.com/mivanci5/Sleep-Wake-Schedule-Volumio-Plugin.git
 
 Navigate to the directory where you want to clone the repository and execute the above command.
 
-Navigate to the Plugin Directory
+*Navigate to the Plugin Directory:*    cd Sleep-Wake-Schedule-Volumio-Plugin
 
-cd Sleep-Wake-Schedule-Volumio-Plugin
+*Install pugin with comand:*   volumio plugin install
 
-Install pugin with comand
-
-volumio plugin install
-
-Restart Volumio
-To activate the plugin, you may need to restart Volumio:
-
-sudo systemctl restart volumio
-
-Enable Plugin
+*Enable Plugin*
 
 Go to the Volumio web UI.
 
@@ -49,6 +38,8 @@ Find the Sleep-Wake Schedule Plugin under System.
 
 Click Enable.
 
+if problem with  starting or saving settings restart volumio
+*restart command:* volumio vrestart
 
 __________________________________________________________________________________
 Configuration Instructions
@@ -61,7 +52,7 @@ In the Volumio web UI, navigate to Settings > Plugins > System > Sleep-Wake Sche
 
 Sleep and Wake Settings:
 
-Sleep Settings: Set the time for the system to enter sleep mode (e.g., fade volume to zero and stop playback).
+Sleep Settings: Set the time for the system to enter sleep mode (e.g., fade volume for 10% and stop playback).
 
 Wake Settings: Configure the wake-up time, start volume, playlist, and how quickly the volume should increase.
 
@@ -71,7 +62,7 @@ Usage Example
 
 Set Sleep Time to 22:30, with a gradual volume decrease over 15 minutes.
 
-Configure Wake Time to 07:00, starting at volume level 20, and play your favorite morning playlist.
+Configure Wake Time to 07:00, starting at volume level 20, and play your favorite morning playlist. While volume inceises for 20min.
 
 
 _________________________________________________________________________________
