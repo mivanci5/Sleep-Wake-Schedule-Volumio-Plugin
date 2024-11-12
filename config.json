@@ -1,9 +1,25 @@
 {
-  "sleepTime": {
+  "Mon_Fri_sleepTime": {
     "type": "string",
     "value": "02:00"
   },
-  "wakeTime": {
+  "Sat_sleepTime": {
+    "type": "string",
+    "value": "02:00"
+  },
+  "Sun_sleepTime": {
+    "type": "string",
+    "value": "02:00"
+  },
+  "Mon_Fri_wakeTime": {
+    "type": "string",
+    "value": "07:00"
+  },
+  "Sat_wakeTime": {
+    "type": "string",
+    "value": "07:00"
+  },
+  "Sun_wakeTime": {
     "type": "string",
     "value": "07:00"
   },
