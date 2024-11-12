@@ -264,7 +264,7 @@ SleepWakePlugin.prototype.loadConfig = function () {
   self.writeLog('minutesRamp: ' + self.minutesRamp);
 };
 
-// izmjene za dane
+// Sleep proces 
 SleepWakePlugin.prototype.scheduleSleep = function () {
   const self = this;
 
@@ -280,9 +280,7 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
     sleepTime = self.config.get('Sun_sleepTime') || '22:00';
   }
 
-  const parsedSleepTime = self.parseTime(sleepTime);
-
-  if (!parsedSleepTime) {
+  if (!sleepTime) {
     self.logger.error('SleepWakePlugin - Invalid sleep time. Sleep will not be scheduled.');
     self.writeLog('Invalid sleep time. Sleep will not be scheduled.');
     return;
@@ -290,13 +288,13 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
 
   self.writeLog('Scheduling sleep...');
   self.writeLog('Current time: ' + now);
-  self.writeLog('Sleep time: ' + parsedSleepTime);
+  self.writeLog('Sleep time: ' + sleepTime);
 
   // If sleepTime is before now, add one day
-  if (parsedSleepTime <= now) parsedSleepTime.setDate(parsedSleepTime.getDate() + 1);
+  if (sleepTime <= now) sleepTime.setDate(sleepTime.getDate() + 1);
 
   // Calculate the time until sleep starts (in milliseconds)
-  let timeUntilSleep = parsedSleepTime - now;
+  let timeUntilSleep = sleepTime - now;
 
   if (self.sleepTimer) {
     clearTimeout(self.sleepTimer);
@@ -312,6 +310,7 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
     self.fadeOutVolume();
   }, timeUntilSleep);
 };
+
 
 // izmjene za dane
 SleepWakePlugin.prototype.scheduleWake = function () {
@@ -339,18 +338,29 @@ SleepWakePlugin.prototype.scheduleWake = function () {
 
   self.writeLog('Scheduling wake...');
   self.writeLog('Current time: ' + now);
-  self.writeLog('Wake time: ' + parsedWakeTime);
+  self.writeLog('Wake time: ' + wakeTime);
 
   // If wakeTime is before now, add one day
-  if (parsedWakeTime <= now) parsedWakeTime.setDate(parsedWakeTime.getDate() + 1);
+  if (wakeTime <= now) wakeTime.setDate(wakeTime.getDate() + 1);
 
   // Calculate the time until wake starts (in milliseconds)
-  let timeUntilWake = parsedWakeTime - now;
+  let timeUntilWake = wakeTime - now;
 
   if (self.wakeTimer) {
     clearTimeout(self.wakeTimer);
     self.writeLog('Cleared existing wake timer.');
   }
+
+  self.logger.info('SleepWakePlugin - Wake scheduled in ' + timeUntilWake + ' milliseconds');
+  self.writeLog('Wake scheduled in ' + timeUntilWake + ' milliseconds');
+
+  self.wakeTimer = setTimeout(function () {
+    self.logger.info('SleepWakePlugin - Wake timer triggered');
+    self.writeLog('Wake timer triggered.');
+    self.startPlaylist();
+  }, timeUntilWake);
+};
+
 
   self.logger.info('SleepWakePlugin - Wake scheduled in ' + timeUntilWake + ' milliseconds');
   self.writeLog('Wake scheduled in ' + timeUntilWake + ' milliseconds');
