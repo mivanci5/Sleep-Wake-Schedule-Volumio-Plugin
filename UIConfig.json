@@ -1,6 +1,6 @@
 {
   "page": {
-    "label": "Sleep Wake Plugin Configuration",
+    "label": "Sleep Wake Schedule Plugin Configuration",
     "icon": "fa-clock-o"
   },
   "sections": [
@@ -17,7 +17,9 @@
       "saveButton": {
         "label": "Save",
         "data": [
-          "sleepTime"
+          "sleepTime",
+          "volumeDecrease",
+          "minutesFade"
         ]
       },
       "content": [
@@ -25,9 +27,25 @@
           "id": "sleepTime",
           "element": "input",
           "type": "text",
-          "label": "Sleep Time",
-          "value": "01:00",
+          "label": "Sleep Time (HH:MM)",
+          "value": "22:00",
           "placeholder": "HH:MM (e.g., 22:00)"
+        },
+        {
+          "id": "volumeDecrease",
+          "element": "input",
+          "type": "number",
+          "label": "How Much Volume to Decrease",
+          "value": 10,
+          "placeholder": "volume decrese"
+        },
+        {
+          "id": "minutesFade",
+          "element": "input",
+          "type": "number",
+          "label": "Minutes to Fade Volume",
+          "value": 10,
+          "placeholder": "minutes"
         }
       ]
     },
@@ -46,7 +64,9 @@
         "data": [
           "wakeTime",
           "startVolume",
-          "playlist"
+          "playlist",
+          "volumeIncrease",
+          "minutesRamp"
         ]
       },
       "content": [
@@ -54,8 +74,8 @@
           "id": "wakeTime",
           "element": "input",
           "type": "text",
-          "label": "Wake Time",
-          "value": "06:00",
+          "label": "Wake Time (HH:MM)",
+          "value": "07:00",
           "placeholder": "HH:MM (e.g., 07:00)"
         },
         {
@@ -73,6 +93,22 @@
           "label": "Playlist Name",
           "value": "",
           "placeholder": "Enter playlist name"
+        },
+        {
+          "id": "volumeIncrease",
+          "element": "input",
+          "type": "number",
+          "label": "How Much Volume to Increase",
+          "value": 10,
+          "placeholder": "volume increase"
+        },
+        {
+          "id": "minutesRamp",
+          "element": "input",
+          "type": "number",
+          "label": "Minutes to Ramp Volume",
+          "value": 10,
+          "placeholder": "minutes"
         }
       ]
     }

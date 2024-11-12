@@ -1,18 +1,34 @@
 {
   "sleepTime": {
     "type": "string",
-    "value": "01:00"
+    "value": "02:00"
   },
   "wakeTime": {
     "type": "string",
-    "value": "06:00"
+    "value": "07:00"
   },
   "startVolume": {
     "type": "string",
-    "value": "40"
+    "value": "20"
   },
   "playlist": {
     "type": "string",
     "value": "wakeup"
+  },
+  "volumeDecrease": {
+    "type": "number",
+    "value": 10
+  },
+  "minutesFade": {
+    "type": "number",
+    "value": 5
+  },
+  "volumeIncrease": {
+    "type": "number",
+    "value": 10
+  },
+  "minutesRamp": {
+    "type": "number",
+    "value": 5
   }
 }
