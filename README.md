@@ -13,12 +13,15 @@ Installation
 To install the plugin, follow these steps:
 
 Clone the repository:
-bash
-Copy code
+bash:
+
 git clone https://github.com/mivanci5/sleep-wake-schedule-volumio-plugin.git
 
 volumio plugin install
+
+
 Enable the plugin via the Volumio web interface.
+
 Configuration
 Once the plugin is installed, you can access its settings in the Volumio web UI:
 
