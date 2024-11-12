@@ -80,6 +80,7 @@ SleepWakePlugin.prototype.onStop = function () {
   return defer.promise;
 };
 
+// izmjene za dane
 SleepWakePlugin.prototype.getUIConfig = function () {
   const self = this;
   const defer = libQ.defer();
@@ -87,6 +88,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
   self.logger.info('SleepWakePlugin - getUIConfig');
   self.writeLog('Loading UI configuration.');
 
+  self.loadConfig();
   const uiconfPath = path.join(__dirname, 'UIConfig.json');
 
   fs.readJson(uiconfPath, function (err, uiconf) {
@@ -98,23 +100,34 @@ SleepWakePlugin.prototype.getUIConfig = function () {
     }
 
     try {
-      // Updating UI with sleep times for each day type
-      uiconf.sections[0].content[0].value = self.config.get('Mon_Fri_sleepTime') || '22:00'; // dodano za dane
-      uiconf.sections[0].content[1].value = self.config.get('Sat_sleepTime') || '22:00'; // dodano za dane
-      uiconf.sections[0].content[2].value = self.config.get('Sun_sleepTime') || '22:00'; // dodano za dane
+      // Postavljanje vrijednosti za Mon-Fri, subotu i nedjelju
+      uiconf.sections[0].content[0].value = self.config.get('Mon_Fri_sleepTime') || '22:00';
+      uiconf.sections[0].content[1].value = self.config.get('Sat_sleepTime') || '22:00';
+      uiconf.sections[0].content[2].value = self.config.get('Sun_sleepTime') || '22:00';
+      uiconf.sections[0].content[3].value = self.config.get('volumeDecrease') || 10;
+      uiconf.sections[0].content[4].value = self.config.get('minutesFade') || 5;
 
-      // Updating UI with wake times for each day type
-      uiconf.sections[1].content[0].value = self.config.get('Mon_Fri_wakeTime') || '07:00'; // dodano za dane
-      uiconf.sections[1].content[1].value = self.config.get('Sat_wakeTime') || '07:00'; // dodano za dane
-      uiconf.sections[1].content[2].value = self.config.get('Sun_wakeTime') || '07:00'; // dodano za dane
-
-      // Updating other UI configuration options
-      uiconf.sections[0].content[1].value = self.config.get('volumeDecrease') || 1;
-      uiconf.sections[0].content[2].value = self.config.get('minutesFade') || 10;
+      uiconf.sections[1].content[0].value = self.config.get('Mon_Fri_wakeTime') || '07:00';
+      uiconf.sections[1].content[1].value = self.config.get('Sat_wakeTime') || '07:00';
+      uiconf.sections[1].content[2].value = self.config.get('Sun_wakeTime') || '07:00';
       uiconf.sections[1].content[3].value = self.config.get('startVolume') || 20;
-      uiconf.sections[1].content[4].value = self.config.get('playlist') || '';
-      uiconf.sections[1].content[5].value = self.config.get('volumeIncrease') || 1;
-      uiconf.sections[1].content[6].value = self.config.get('minutesRamp') || 10;
+      uiconf.sections[1].content[4].value = self.config.get('playlist') || 'wakeup';
+      uiconf.sections[1].content[5].value = self.config.get('volumeIncrease') || 10;
+      uiconf.sections[1].content[6].value = self.config.get('minutesRamp') || 5;
+
+      // Additional log to verify values retrieved from config
+      self.writeLog('Configuration values loaded for UI: Mon_Fri_sleepTime: ' + uiconf.sections[0].content[0].value);
+      self.writeLog('Sat_sleepTime: ' + uiconf.sections[0].content[1].value);
+      self.writeLog('Sun_sleepTime: ' + uiconf.sections[0].content[2].value);
+      self.writeLog('volumeDecrease: ' + uiconf.sections[0].content[3].value);
+      self.writeLog('minutesFade: ' + uiconf.sections[0].content[4].value);
+      self.writeLog('Mon_Fri_wakeTime: ' + uiconf.sections[1].content[0].value);
+      self.writeLog('Sat_wakeTime: ' + uiconf.sections[1].content[1].value);
+      self.writeLog('Sun_wakeTime: ' + uiconf.sections[1].content[2].value);
+      self.writeLog('startVolume: ' + uiconf.sections[1].content[3].value);
+      self.writeLog('playlist: ' + uiconf.sections[1].content[4].value);
+      self.writeLog('volumeIncrease: ' + uiconf.sections[1].content[5].value);
+      self.writeLog('minutesRamp: ' + uiconf.sections[1].content[6].value);
 
       self.writeLog('UI configuration loaded successfully.');
       defer.resolve(uiconf);
@@ -125,9 +138,18 @@ SleepWakePlugin.prototype.getUIConfig = function () {
     }
   });
 
-  return defer.promise();
+  return defer.promise;
+    } catch (parseError) {
+      self.logger.error('SleepWakePlugin - Error parsing UIConfig.json: ' + parseError);
+      self.writeLog('Error parsing UIConfig.json: ' + parseError);
+      defer.reject(new Error());
+    }
+  });
+
+  return defer.promise;
 };
 
+// izmjene za dane
 SleepWakePlugin.prototype.saveOptions = function (data) {
   const self = this;
 
@@ -135,16 +157,12 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   self.writeLog('Saving options. Data received: ' + JSON.stringify(data));
 
   // Extract values from data
-  const sleepTimes = {
-    'Mon_Fri_sleepTime': data['Mon_Fri_sleepTime'],
-    'Sat_sleepTime': data['Sat_sleepTime'],
-    'Sun_sleepTime': data['Sun_sleepTime']
-  };
-  const wakeTimes = {
-    'Mon_Fri_wakeTime': data['Mon_Fri_wakeTime'],
-    'Sat_wakeTime': data['Sat_wakeTime'],
-    'Sun_wakeTime': data['Sun_wakeTime']
-  };
+  const sleepTime_Mon_Fri = data['Mon_Fri_sleepTime'];
+  const sleepTime_Sat = data['Sat_sleepTime'];
+  const sleepTime_Sun = data['Sun_sleepTime'];
+  const wakeTime_Mon_Fri = data['Mon_Fri_wakeTime'];
+  const wakeTime_Sat = data['Sat_wakeTime'];
+  const wakeTime_Sun = data['Sun_wakeTime'];
   const startVolume = data['startVolume'];
   const playlist = data['playlist'];
   const volumeDecrease = data['volumeDecrease'];
@@ -152,23 +170,31 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   const volumeIncrease = data['volumeIncrease'];
   const minutesRamp = data['minutesRamp'];
 
-  // Save sleep settings
-  self.writeLog('Saving sleep settings');
-  Object.keys(sleepTimes).forEach(function (key) {
-    if (sleepTimes[key] !== undefined) {
-      self.config.set(key, { type: 'string', value: sleepTimes[key] }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-      self.writeLog('Set ' + key + ' to ' + sleepTimes[key]);
-    }
-  });
-
-  // Save wake settings
-  self.writeLog('Saving wake settings');
-  Object.keys(wakeTimes).forEach(function (key) {
-    if (wakeTimes[key] !== undefined) {
-      self.config.set(key, { type: 'string', value: wakeTimes[key] }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-      self.writeLog('Set ' + key + ' to ' + wakeTimes[key]);
-    }
-  });
+  // Save sleep and wake settings for different days
+  if (sleepTime_Mon_Fri !== undefined) {
+    self.config.set('Mon_Fri_sleepTime', sleepTime_Mon_Fri);
+    self.writeLog('Set Mon_Fri_sleepTime to ' + sleepTime_Mon_Fri);
+  }
+  if (sleepTime_Sat !== undefined) {
+    self.config.set('Sat_sleepTime', sleepTime_Sat);
+    self.writeLog('Set Sat_sleepTime to ' + sleepTime_Sat);
+  }
+  if (sleepTime_Sun !== undefined) {
+    self.config.set('Sun_sleepTime', sleepTime_Sun);
+    self.writeLog('Set Sun_sleepTime to ' + sleepTime_Sun);
+  }
+  if (wakeTime_Mon_Fri !== undefined) {
+    self.config.set('Mon_Fri_wakeTime', wakeTime_Mon_Fri);
+    self.writeLog('Set Mon_Fri_wakeTime to ' + wakeTime_Mon_Fri);
+  }
+  if (wakeTime_Sat !== undefined) {
+    self.config.set('Sat_wakeTime', wakeTime_Sat);
+    self.writeLog('Set Sat_wakeTime to ' + wakeTime_Sat);
+  }
+  if (wakeTime_Sun !== undefined) {
+    self.config.set('Sun_wakeTime', wakeTime_Sun);
+    self.writeLog('Set Sun_wakeTime to ' + wakeTime_Sun);
+  }
 
   if (startVolume !== undefined) {
     const volumeValue = parseInt(startVolume, 10);
@@ -176,28 +202,28 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
       self.logger.error('SleepWakePlugin - Invalid startVolume value: ' + JSON.stringify(startVolume));
       self.writeLog('Invalid startVolume value: ' + JSON.stringify(startVolume));
     } else {
-      self.config.set('startVolume', { type: 'string', value: volumeValue }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+      self.config.set('startVolume', volumeValue);
       self.writeLog('Set startVolume to ' + volumeValue);
     }
   }
   if (playlist !== undefined) {
-    self.config.set('playlist', { type: 'string', value: playlist }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+    self.config.set('playlist', playlist);
     self.writeLog('Set playlist to ' + playlist);
   }
   if (volumeDecrease !== undefined) {
-    self.config.set('volumeDecrease', { type: 'number', value: volumeDecrease }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+    self.config.set('volumeDecrease', volumeDecrease);
     self.writeLog('Set volumeDecrease to ' + volumeDecrease);
   }
   if (minutesFade !== undefined) {
-    self.config.set('minutesFade', { type: 'number', value: minutesFade }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+    self.config.set('minutesFade', minutesFade);
     self.writeLog('Set minutesFade to ' + minutesFade);
   }
   if (volumeIncrease !== undefined) {
-    self.config.set('volumeIncrease', { type: 'number', value: volumeIncrease }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+    self.config.set('volumeIncrease', volumeIncrease);
     self.writeLog('Set volumeIncrease to ' + volumeIncrease);
   }
   if (minutesRamp !== undefined) {
-    self.config.set('minutesRamp', { type: 'number', value: minutesRamp }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+    self.config.set('minutesRamp', minutesRamp);
     self.writeLog('Set minutesRamp to ' + minutesRamp);
   }
 
@@ -215,31 +241,30 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   return libQ.resolve();
 };
 
+// izmjene za dane
 SleepWakePlugin.prototype.loadConfig = function () {
   const self = this;
 
-  self.sleepTimes = {
-    'Mon-Fri': self.config.get('Mon_Fri_sleepTime').value || '22:00', // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-    'Sat': self.config.get('Sat_sleepTime').value || '22:00', // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-    'Sun': self.config.get('Sun_sleepTime').value || '22:00' // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-  };
-
-  self.wakeTimes = {
-    'Mon-Fri': self.config.get('Mon_Fri_wakeTime').value || '07:00', // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-    'Sat': self.config.get('Sat_wakeTime').value || '07:00', // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-    'Sun': self.config.get('Sun_wakeTime').value || '07:00' // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-  };
-
-  self.startVolume = parseInt(self.config.get('startVolume').value, 10) || 20; // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-  self.playlist = self.config.get('playlist').value || ''; // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-  self.volumeDecrease = parseInt(self.config.get('volumeDecrease').value, 10) || 1; // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-  self.minutesFade = parseInt(self.config.get('minutesFade').value, 10) || 10; // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-  self.volumeIncrease = parseInt(self.config.get('volumeIncrease').value, 10) || 1; // Dodano - izmijenjeno za ispravno učitavanje - spremanje
-  self.minutesRamp = parseInt(self.config.get('minutesRamp').value, 10) || 10; // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+  self.sleepTime_Mon_Fri = self.config.get('Mon_Fri_sleepTime') || '22:00';
+  self.sleepTime_Sat = self.config.get('Sat_sleepTime') || '22:00';
+  self.sleepTime_Sun = self.config.get('Sun_sleepTime') || '22:00';
+  self.wakeTime_Mon_Fri = self.config.get('Mon_Fri_wakeTime') || '07:00';
+  self.wakeTime_Sat = self.config.get('Sat_wakeTime') || '07:00';
+  self.wakeTime_Sun = self.config.get('Sun_wakeTime') || '07:00';
+  self.startVolume = parseInt(self.config.get('startVolume'), 10) || 20;
+  self.playlist = self.config.get('playlist') || '';
+  self.volumeDecrease = parseInt(self.config.get('volumeDecrease'), 10) || 1;
+  self.minutesFade = parseInt(self.config.get('minutesFade'), 10) || 10;
+  self.volumeIncrease = parseInt(self.config.get('volumeIncrease'), 10) || 1;
+  self.minutesRamp = parseInt(self.config.get('minutesRamp'), 10) || 10;
 
   self.writeLog('Configuration loaded:');
-  self.writeLog('sleepTimes: ' + JSON.stringify(self.sleepTimes));
-  self.writeLog('wakeTimes: ' + JSON.stringify(self.wakeTimes));
+  self.writeLog('sleepTime_Mon_Fri: ' + self.sleepTime_Mon_Fri);
+  self.writeLog('sleepTime_Sat: ' + self.sleepTime_Sat);
+  self.writeLog('sleepTime_Sun: ' + self.sleepTime_Sun);
+  self.writeLog('wakeTime_Mon_Fri: ' + self.wakeTime_Mon_Fri);
+  self.writeLog('wakeTime_Sat: ' + self.wakeTime_Sat);
+  self.writeLog('wakeTime_Sun: ' + self.wakeTime_Sun);
   self.writeLog('startVolume: ' + self.startVolume);
   self.writeLog('playlist: ' + self.playlist);
   self.writeLog('volumeDecrease: ' + self.volumeDecrease);
@@ -247,29 +272,27 @@ SleepWakePlugin.prototype.loadConfig = function () {
   self.writeLog('volumeIncrease: ' + self.volumeIncrease);
   self.writeLog('minutesRamp: ' + self.minutesRamp);
 };
-
-// Determine the current day type for selecting sleep and wake times
-SleepWakePlugin.prototype.getDayType = function () {
-  const today = new Date().getDay();
-  if (today >= 1 && today <= 5) {
-    return 'Mon-Fri'; // dodano za dane
-  } else if (today === 6) {
-    return 'Sat'; // dodano za dane
-  } else {
-    return 'Sun'; // dodano za dane
-  }
 };
 
+// izmjene za dane
 SleepWakePlugin.prototype.scheduleSleep = function () {
- 
   const self = this;
 
   const now = new Date();
-  const dayType = self.getDayType(); // dodano za dane
-  const sleepTimeStr = self.sleepTimes[dayType]; // dodano za dane
-  const sleepTime = self.parseTime(self.sleepTime);
+  const dayOfWeek = now.getDay();
+  let sleepTime;
 
-  if (!sleepTime) {
+  if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
+    sleepTime = self.config.get('Mon_Fri_sleepTime') || '22:00';
+  } else if (dayOfWeek === 6) { // Saturday
+    sleepTime = self.config.get('Sat_sleepTime') || '22:00';
+  } else if (dayOfWeek === 0) { // Sunday
+    sleepTime = self.config.get('Sun_sleepTime') || '22:00';
+  }
+
+  const parsedSleepTime = self.parseTime(sleepTime);
+
+  if (!parsedSleepTime) {
     self.logger.error('SleepWakePlugin - Invalid sleep time. Sleep will not be scheduled.');
     self.writeLog('Invalid sleep time. Sleep will not be scheduled.');
     return;
@@ -277,13 +300,13 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
 
   self.writeLog('Scheduling sleep...');
   self.writeLog('Current time: ' + now);
-  self.writeLog('Sleep time: ' + sleepTime);
+  self.writeLog('Sleep time: ' + parsedSleepTime);
 
   // If sleepTime is before now, add one day
-  if (sleepTime <= now) sleepTime.setDate(sleepTime.getDate() + 1);
+  if (parsedSleepTime <= now) parsedSleepTime.setDate(parsedSleepTime.getDate() + 1);
 
   // Calculate the time until sleep starts (in milliseconds)
-  let timeUntilSleep = sleepTime - now;
+  let timeUntilSleep = parsedSleepTime - now;
 
   if (self.sleepTimer) {
     clearTimeout(self.sleepTimer);
@@ -300,16 +323,25 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
   }, timeUntilSleep);
 };
 
+// izmjene za dane
 SleepWakePlugin.prototype.scheduleWake = function () {
- 
   const self = this;
 
   const now = new Date();
-  const dayType = self.getDayType(); // dodano za dane
-  const wakeTimeStr = self.wakeTimes[dayType]; // dodano za dane
-  const wakeTime = self.parseTime(self.wakeTime);
+  const dayOfWeek = now.getDay();
+  let wakeTime;
 
-  if (!wakeTime) {
+  if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
+    wakeTime = self.config.get('Mon_Fri_wakeTime') || '07:00';
+  } else if (dayOfWeek === 6) { // Saturday
+    wakeTime = self.config.get('Sat_wakeTime') || '07:00';
+  } else if (dayOfWeek === 0) { // Sunday
+    wakeTime = self.config.get('Sun_wakeTime') || '07:00';
+  }
+
+  const parsedWakeTime = self.parseTime(wakeTime);
+
+  if (!parsedWakeTime) {
     self.logger.error('SleepWakePlugin - Invalid wake time. Wake will not be scheduled.');
     self.writeLog('Invalid wake time. Wake will not be scheduled.');
     return;
@@ -317,13 +349,13 @@ SleepWakePlugin.prototype.scheduleWake = function () {
 
   self.writeLog('Scheduling wake...');
   self.writeLog('Current time: ' + now);
-  self.writeLog('Wake time: ' + wakeTime);
+  self.writeLog('Wake time: ' + parsedWakeTime);
 
   // If wakeTime is before now, add one day
-  if (wakeTime <= now) wakeTime.setDate(wakeTime.getDate() + 1);
+  if (parsedWakeTime <= now) parsedWakeTime.setDate(parsedWakeTime.getDate() + 1);
 
   // Calculate the time until wake starts (in milliseconds)
-  let timeUntilWake = wakeTime - now;
+  let timeUntilWake = parsedWakeTime - now;
 
   if (self.wakeTimer) {
     clearTimeout(self.wakeTimer);
