@@ -81,14 +81,12 @@ SleepWakePlugin.prototype.onStop = function () {
 };
 
 SleepWakePlugin.prototype.getUIConfig = function () {
- 
   const self = this;
   const defer = libQ.defer();
 
   self.logger.info('SleepWakePlugin - getUIConfig');
   self.writeLog('Loading UI configuration.');
 
-  self.loadConfig();
   const uiconfPath = path.join(__dirname, 'UIConfig.json');
 
   fs.readJson(uiconfPath, function (err, uiconf) {
@@ -100,26 +98,22 @@ SleepWakePlugin.prototype.getUIConfig = function () {
     }
 
     try {
-      uiconf.sections[0].content[0].value = self.config.get('sleepTime') || '22:00';
-      uiconf.sections[0].content[1].value = self.config.get('volumeDecrease') || 1;
-      uiconf.sections[0].content[2].value = self.config.get('minutesFade') || 10;
+      // Updating UI with sleep times for each day type
+      uiconf.sections[0].content[0].value = self.config.get('Mon_Fri_sleepTime') || '22:00'; // dodano za dane
+      uiconf.sections[0].content[1].value = self.config.get('Sat_sleepTime') || '22:00'; // dodano za dane
+      uiconf.sections[0].content[2].value = self.config.get('Sun_sleepTime') || '22:00'; // dodano za dane
 
-      uiconf.sections[1].content[0].value = self.config.get('wakeTime') || '07:00';
-      uiconf.sections[1].content[1].value = self.config.get('startVolume') || 20;
-      uiconf.sections[1].content[2].value = self.config.get('playlist') || '';
-      uiconf.sections[1].content[3].value = self.config.get('volumeIncrease') || 1;
-      uiconf.sections[1].content[4].value = self.config.get('minutesRamp') || 10;
+      // Updating UI with wake times for each day type
+      uiconf.sections[1].content[0].value = self.config.get('Mon_Fri_wakeTime') || '07:00'; // dodano za dane
+      uiconf.sections[1].content[1].value = self.config.get('Sat_wakeTime') || '07:00'; // dodano za dane
+      uiconf.sections[1].content[2].value = self.config.get('Sun_wakeTime') || '07:00'; // dodano za dane
 
-            // Additional log to verify values retrieved from config
-      self.writeLog('Configuration values loaded for UI: sleepTime: ' + uiconf.sections[0].content[0].value);
-      self.writeLog('volumeDecrease: ' + uiconf.sections[0].content[1].value);
-      self.writeLog('minutesFade: ' + uiconf.sections[0].content[2].value);
-      self.writeLog('wakeTime: ' + uiconf.sections[1].content[0].value);
-      self.writeLog('startVolume: ' + uiconf.sections[1].content[1].value);
-      self.writeLog('playlist: ' + uiconf.sections[1].content[2].value);
-      self.writeLog('volumeIncrease: ' + uiconf.sections[1].content[3].value);
-      self.writeLog('minutesRamp: ' + uiconf.sections[1].content[4].value);
-      
+      // Updating other UI configuration options
+      uiconf.sections[1].content[3].value = self.config.get('startVolume') || 20;
+      uiconf.sections[1].content[4].value = self.config.get('playlist') || '';
+      uiconf.sections[1].content[5].value = self.config.get('volumeIncrease') || 1;
+      uiconf.sections[1].content[6].value = self.config.get('minutesRamp') || 10;
+
       self.writeLog('UI configuration loaded successfully.');
       defer.resolve(uiconf);
     } catch (parseError) {
@@ -129,19 +123,26 @@ SleepWakePlugin.prototype.getUIConfig = function () {
     }
   });
 
-  return defer.promise;
+  return defer.promise();
 };
 
 SleepWakePlugin.prototype.saveOptions = function (data) {
-  
   const self = this;
 
   self.logger.info('SleepWakePlugin - saveOptions');
   self.writeLog('Saving options. Data received: ' + JSON.stringify(data));
 
   // Extract values from data
-  const sleepTime = data['sleepTime'];
-  const wakeTime = data['wakeTime'];
+  const sleepTimes = {
+    'Mon_Fri_sleepTime': data['Mon_Fri_sleepTime'],
+    'Sat_sleepTime': data['Sat_sleepTime'],
+    'Sun_sleepTime': data['Sun_sleepTime']
+  };
+  const wakeTimes = {
+    'Mon_Fri_wakeTime': data['Mon_Fri_wakeTime'],
+    'Sat_wakeTime': data['Sat_wakeTime'],
+    'Sun_wakeTime': data['Sun_wakeTime']
+  };
   const startVolume = data['startVolume'];
   const playlist = data['playlist'];
   const volumeDecrease = data['volumeDecrease'];
@@ -151,72 +152,52 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
 
   // Save sleep settings
   self.writeLog('Saving sleep settings');
-
-  if (sleepTime !== undefined) {
-    self.config.set('sleepTime', sleepTime); // Corrected
-    self.sleepTime = sleepTime;
-    self.writeLog('Set sleepTime to ' + sleepTime);
-    if (self.sleepTimer) {
-      clearTimeout(self.sleepTimer);
-      self.writeLog('Cleared existing sleep timer.');
+  Object.keys(sleepTimes).forEach(function (key) {
+    if (sleepTimes[key] !== undefined) {
+      self.config.set(key, sleepTimes[key]);
+      self.writeLog('Set ' + key + ' to ' + sleepTimes[key]);
     }
-    self.scheduleSleep();
-  }
-
-  if (volumeDecrease !== undefined) {
-    self.config.set('volumeDecrease', volumeDecrease); // Corrected
-    self.volumeDecrease = volumeDecrease;
-    self.writeLog('Set volumeDecrease to ' + volumeDecrease);
-  }
-
-  if (minutesFade !== undefined) {
-    self.config.set('minutesFade', minutesFade); // Corrected
-    self.minutesFade = minutesFade;
-    self.writeLog('Set minutesFade to ' + minutesFade);
-  }
+  });
 
   // Save wake settings
   self.writeLog('Saving wake settings');
+  Object.keys(wakeTimes).forEach(function (key) {
+    if (wakeTimes[key] !== undefined) {
+      self.config.set(key, wakeTimes[key]);
+      self.writeLog('Set ' + key + ' to ' + wakeTimes[key]);
+    }
+  });
 
-  if (wakeTime !== undefined || startVolume !== undefined || playlist !== undefined || volumeIncrease !== undefined || minutesRamp !== undefined) {
-    if (wakeTime !== undefined) {
-      self.config.set('wakeTime', wakeTime); // Corrected
-      self.wakeTime = wakeTime;
-      self.writeLog('Set wakeTime to ' + wakeTime);
+  if (startVolume !== undefined) {
+    const volumeValue = parseInt(startVolume, 10);
+    if (isNaN(volumeValue)) {
+      self.logger.error('SleepWakePlugin - Invalid startVolume value: ' + JSON.stringify(startVolume));
+      self.writeLog('Invalid startVolume value: ' + JSON.stringify(startVolume));
+    } else {
+      self.config.set('startVolume', volumeValue);
+      self.writeLog('Set startVolume to ' + volumeValue);
     }
-    if (startVolume !== undefined) {
-      const volumeValue = parseInt(startVolume, 10);
-      if (isNaN(volumeValue)) {
-        self.logger.error('SleepWakePlugin - Invalid startVolume value: ' + JSON.stringify(startVolume));
-        self.writeLog('Invalid startVolume value: ' + JSON.stringify(startVolume));
-      } else {
-        self.config.set('startVolume', volumeValue); // Corrected
-        self.startVolume = volumeValue;
-        self.writeLog('Set startVolume to ' + volumeValue);
-      }
-    }
-    if (playlist !== undefined) {
-      self.config.set('playlist', playlist); // Corrected
-      self.playlist = playlist;
-      self.writeLog('Set playlist to ' + playlist);
-    }
-    if (volumeIncrease !== undefined) {
-      self.config.set('volumeIncrease', volumeIncrease); // Corrected
-      self.volumeIncrease = volumeIncrease;
-      self.writeLog('Set volumeIncrease to ' + volumeIncrease);
-    }
-    if (minutesRamp !== undefined) {
-      self.config.set('minutesRamp', minutesRamp); // Corrected
-      self.minutesRamp = minutesRamp;
-      self.writeLog('Set minutesRamp to ' + minutesRamp);
-    }
-    if (self.wakeTimer) {
-      clearTimeout(self.wakeTimer);
-      self.writeLog('Cleared existing wake timer.');
-    }
-    self.scheduleWake();
   }
-
+  if (playlist !== undefined) {
+    self.config.set('playlist', playlist);
+    self.writeLog('Set playlist to ' + playlist);
+  }
+  if (volumeDecrease !== undefined) {
+    self.config.set('volumeDecrease', volumeDecrease);
+    self.writeLog('Set volumeDecrease to ' + volumeDecrease);
+  }
+  if (minutesFade !== undefined) {
+    self.config.set('minutesFade', minutesFade);
+    self.writeLog('Set minutesFade to ' + minutesFade);
+  }
+  if (volumeIncrease !== undefined) {
+    self.config.set('volumeIncrease', volumeIncrease);
+    self.writeLog('Set volumeIncrease to ' + volumeIncrease);
+  }
+  if (minutesRamp !== undefined) {
+    self.config.set('minutesRamp', minutesRamp);
+    self.writeLog('Set minutesRamp to ' + minutesRamp);
+  }
 
   // Save configuration to disk
   self.writeLog('Save configuration on disk');
@@ -233,11 +214,20 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
 };
 
 SleepWakePlugin.prototype.loadConfig = function () {
- 
   const self = this;
 
-  self.sleepTime = self.config.get('sleepTime') || '22:00';
-  self.wakeTime = self.config.get('wakeTime') || '07:00';
+  self.sleepTimes = {
+    'Mon-Fri': self.config.get('Mon_Fri_sleepTime') || '22:00',
+    'Sat': self.config.get('Sat_sleepTime') || '22:00',
+    'Sun': self.config.get('Sun_sleepTime') || '22:00',
+  };
+
+  self.wakeTimes = {
+    'Mon-Fri': self.config.get('Mon_Fri_wakeTime') || '07:00',
+    'Sat': self.config.get('Sat_wakeTime') || '07:00',
+    'Sun': self.config.get('Sun_wakeTime') || '07:00',
+  };
+
   self.startVolume = parseInt(self.config.get('startVolume'), 10) || 20;
   self.playlist = self.config.get('playlist') || '';
   self.volumeDecrease = parseInt(self.config.get('volumeDecrease'), 10) || 1;
@@ -246,8 +236,8 @@ SleepWakePlugin.prototype.loadConfig = function () {
   self.minutesRamp = parseInt(self.config.get('minutesRamp'), 10) || 10;
 
   self.writeLog('Configuration loaded:');
-  self.writeLog('sleepTime: ' + self.sleepTime);
-  self.writeLog('wakeTime: ' + self.wakeTime);
+  self.writeLog('sleepTimes: ' + JSON.stringify(self.sleepTimes));
+  self.writeLog('wakeTimes: ' + JSON.stringify(self.wakeTimes));
   self.writeLog('startVolume: ' + self.startVolume);
   self.writeLog('playlist: ' + self.playlist);
   self.writeLog('volumeDecrease: ' + self.volumeDecrease);
@@ -256,11 +246,25 @@ SleepWakePlugin.prototype.loadConfig = function () {
   self.writeLog('minutesRamp: ' + self.minutesRamp);
 };
 
+// Determine the current day type for selecting sleep and wake times
+SleepWakePlugin.prototype.getDayType = function () {
+  const today = new Date().getDay();
+  if (today >= 1 && today <= 5) {
+    return 'Mon-Fri'; // dodano za dane
+  } else if (today === 6) {
+    return 'Sat'; // dodano za dane
+  } else {
+    return 'Sun'; // dodano za dane
+  }
+};
+
 SleepWakePlugin.prototype.scheduleSleep = function () {
  
   const self = this;
 
   const now = new Date();
+  const dayType = self.getDayType(); // dodano za dane
+  const sleepTimeStr = self.sleepTimes[dayType]; // dodano za dane
   const sleepTime = self.parseTime(self.sleepTime);
 
   if (!sleepTime) {
@@ -299,6 +303,8 @@ SleepWakePlugin.prototype.scheduleWake = function () {
   const self = this;
 
   const now = new Date();
+  const dayType = self.getDayType(); // dodano za dane
+  const wakeTimeStr = self.wakeTimes[dayType]; // dodano za dane
   const wakeTime = self.parseTime(self.wakeTime);
 
   if (!wakeTime) {
