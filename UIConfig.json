@@ -17,7 +17,9 @@
       "saveButton": {
         "label": "Save",
         "data": [
-          "sleepTime",
+          "Mon_Fri_sleepTime",
+          "Sat_sleepTime",
+          "Sun_sleepTime",
           "volumeDecrease",
           "minutesFade"
         ]
@@ -78,7 +80,9 @@
       "saveButton": {
         "label": "Save",
         "data": [
-          "wakeTime",
+          "Mon_Fri_wakeTime",
+          "Sat_wakeTime",
+          "Sun_wakeTime",
           "startVolume",
           "playlist",
           "volumeIncrease",
