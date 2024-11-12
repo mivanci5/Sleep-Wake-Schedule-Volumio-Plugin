@@ -583,6 +583,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
       self.writeLog('Cleared sleep timer.');
     }
     self.isSleeping = false;
+    return;
   }
 
   self.isWaking = true;
