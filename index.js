@@ -369,18 +369,6 @@ SleepWakePlugin.prototype.scheduleWake = function () {
   }, timeUntilWake);
 };
 
-
-
-  self.logger.info('SleepWakePlugin - Wake scheduled in ' + timeUntilWake + ' milliseconds');
-  self.writeLog('Wake scheduled in ' + timeUntilWake + ' milliseconds');
-
-  self.wakeTimer = setTimeout(function () {
-    self.logger.info('SleepWakePlugin - Wake timer triggered');
-    self.writeLog('Wake timer triggered.');
-    self.startPlaylist();
-  }, timeUntilWake);
-};
-
 SleepWakePlugin.prototype.parseTime = function (timeStr) {
  
   const self = this;
