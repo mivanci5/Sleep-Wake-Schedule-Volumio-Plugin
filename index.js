@@ -131,12 +131,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
 
       self.writeLog('UI configuration loaded successfully.');
       defer.resolve(uiconf);
-    } catch (parseError) {
-      self.logger.error('SleepWakePlugin - Error parsing UIConfig.json: ' + parseError);
-      self.writeLog('Error parsing UIConfig.json: ' + parseError);
-      defer.reject(new Error());
-    }
-  });
+    });
 
   return defer.promise;
     } catch (parseError) {
@@ -229,7 +224,6 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
 
   // Save configuration to disk
   self.writeLog('Save configuration on disk');
-  
   self.config.save();
   self.writeLog('Configuration saved.');
 
