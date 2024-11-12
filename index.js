@@ -156,7 +156,7 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   self.writeLog('Saving sleep settings');
   Object.keys(sleepTimes).forEach(function (key) {
     if (sleepTimes[key] !== undefined) {
-      self.config.set(key, sleepTimes[key]); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+      self.config.set(key, { type: 'string', value: sleepTimes[key] }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
       self.writeLog('Set ' + key + ' to ' + sleepTimes[key]);
     }
   });
@@ -165,7 +165,7 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   self.writeLog('Saving wake settings');
   Object.keys(wakeTimes).forEach(function (key) {
     if (wakeTimes[key] !== undefined) {
-      self.config.set(key, wakeTimes[key]); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+      self.config.set(key, { type: 'string', value: wakeTimes[key] }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
       self.writeLog('Set ' + key + ' to ' + wakeTimes[key]);
     }
   });
@@ -176,28 +176,28 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
       self.logger.error('SleepWakePlugin - Invalid startVolume value: ' + JSON.stringify(startVolume));
       self.writeLog('Invalid startVolume value: ' + JSON.stringify(startVolume));
     } else {
-      self.config.set('startVolume', volumeValue);
+      self.config.set('startVolume', { type: 'string', value: volumeValue }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
       self.writeLog('Set startVolume to ' + volumeValue);
     }
   }
   if (playlist !== undefined) {
-    self.config.set('playlist', playlist);
+    self.config.set('playlist', { type: 'string', value: playlist }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
     self.writeLog('Set playlist to ' + playlist);
   }
   if (volumeDecrease !== undefined) {
-    self.config.set('volumeDecrease', volumeDecrease);
+    self.config.set('volumeDecrease', { type: 'number', value: volumeDecrease }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
     self.writeLog('Set volumeDecrease to ' + volumeDecrease);
   }
   if (minutesFade !== undefined) {
-    self.config.set('minutesFade', minutesFade);
+    self.config.set('minutesFade', { type: 'number', value: minutesFade }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
     self.writeLog('Set minutesFade to ' + minutesFade);
   }
   if (volumeIncrease !== undefined) {
-    self.config.set('volumeIncrease', volumeIncrease);
+    self.config.set('volumeIncrease', { type: 'number', value: volumeIncrease }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
     self.writeLog('Set volumeIncrease to ' + volumeIncrease);
   }
   if (minutesRamp !== undefined) {
-    self.config.set('minutesRamp', minutesRamp);
+    self.config.set('minutesRamp', { type: 'number', value: minutesRamp }); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
     self.writeLog('Set minutesRamp to ' + minutesRamp);
   }
 
@@ -219,23 +219,23 @@ SleepWakePlugin.prototype.loadConfig = function () {
   const self = this;
 
   self.sleepTimes = {
-    'Mon-Fri': self.config.get('Mon_Fri_sleepTime') || '22:00',
-    'Sat': self.config.get('Sat_sleepTime') || '22:00',
-    'Sun': self.config.get('Sun_sleepTime') || '22:00',
+    'Mon-Fri': self.config.get('Mon_Fri_sleepTime').value || '22:00', // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+    'Sat': self.config.get('Sat_sleepTime').value || '22:00', // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+    'Sun': self.config.get('Sun_sleepTime').value || '22:00' // Dodano - izmijenjeno za ispravno učitavanje - spremanje
   };
 
   self.wakeTimes = {
-    'Mon-Fri': self.config.get('Mon_Fri_wakeTime') || '07:00',
-    'Sat': self.config.get('Sat_wakeTime') || '07:00',
-    'Sun': self.config.get('Sun_wakeTime') || '07:00',
+    'Mon-Fri': self.config.get('Mon_Fri_wakeTime').value || '07:00', // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+    'Sat': self.config.get('Sat_wakeTime').value || '07:00', // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+    'Sun': self.config.get('Sun_wakeTime').value || '07:00' // Dodano - izmijenjeno za ispravno učitavanje - spremanje
   };
 
-  self.startVolume = parseInt(self.config.get('startVolume'), 10) || 20;
-  self.playlist = self.config.get('playlist') || '';
-  self.volumeDecrease = parseInt(self.config.get('volumeDecrease'), 10) || 1;
-  self.minutesFade = parseInt(self.config.get('minutesFade'), 10) || 10;
-  self.volumeIncrease = parseInt(self.config.get('volumeIncrease'), 10) || 1;
-  self.minutesRamp = parseInt(self.config.get('minutesRamp'), 10) || 10;
+  self.startVolume = parseInt(self.config.get('startVolume').value, 10) || 20; // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+  self.playlist = self.config.get('playlist').value || ''; // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+  self.volumeDecrease = parseInt(self.config.get('volumeDecrease').value, 10) || 1; // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+  self.minutesFade = parseInt(self.config.get('minutesFade').value, 10) || 10; // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+  self.volumeIncrease = parseInt(self.config.get('volumeIncrease').value, 10) || 1; // Dodano - izmijenjeno za ispravno učitavanje - spremanje
+  self.minutesRamp = parseInt(self.config.get('minutesRamp').value, 10) || 10; // Dodano - izmijenjeno za ispravno učitavanje - spremanje
 
   self.writeLog('Configuration loaded:');
   self.writeLog('sleepTimes: ' + JSON.stringify(self.sleepTimes));
