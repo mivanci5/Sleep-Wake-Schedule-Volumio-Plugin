@@ -47,7 +47,10 @@ SleepWakePlugin.prototype.onStart = function () {
   self.writeLog('Plugin started.');
 
   self.loadConfig();
+
+  self.writeLog('Next is ScheduleSleep function.');
   self.scheduleSleep();
+  self.writeLog('Next is ScheduleWake function.');
   self.scheduleWake();
 
   defer.resolve();
