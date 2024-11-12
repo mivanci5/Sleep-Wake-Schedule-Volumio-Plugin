@@ -1,8 +1,36 @@
 Description
 
 The Sleep-Wake Schedule Plugin for Volumio allows users to automate the system's playback behavior, such as volume fading and music playback, during predefined sleep and wake-up times. This plugin is perfect for those who want to schedule their music playback experience around bedtime and morning routines.
-
-
+_____________________________________________________________________________________
++-----------------------------------------------------------+
+| Sleep Wake Schedule Plugin Configuration                  |
++-----------------------------------------------------------+
+|                                                           |
+----[ 🌜 Night Mode ]--------------------------------------
+|                                                           |
+| Mon-Fri Sleep Time (HH:MM) | [        22:00             ] |
+| Saturday Sleep Time (HH:MM)| [        22:00             ] |
+| Sunday Sleep Time (HH:MM)  | [        22:00             ] |
+| Volume Decrease (%)        | [          10              ] |
+| Fade Out (Minutes)         | [          10              ] |
+|                                                           |
+|                        [ Save ]                           |
+|                                                           | 
+------------------------------------------------------------
+|                                                           |
+----[ ☀️ Morning Mode ]-------------------------------------
+|                                                           |
+| Mon-Fri Wake Time (HH:MM)  | [        07:00             ] |
+| Saturday Wake Time (HH:MM) | [        07:00             ] |
+| Sunday Wake Time (HH:MM)   | [        07:00             ] |
+| Start Volume               | [          35              ] |
+| Playlist Name              | [   WakeUp List            ] |
+| Volume Increase (%)        | [          10              ] |
+| Ramp Up (Minutes)          | [          10              ] |
+|
+|                        [ Save ]                           |
+|                                                           |
+------------------------------------------------------------
 ______________________________________________________________________________________
 Key Features:
 
