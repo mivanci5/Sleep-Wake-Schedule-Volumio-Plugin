@@ -263,7 +263,6 @@ SleepWakePlugin.prototype.loadConfig = function () {
   self.writeLog('volumeIncrease: ' + self.volumeIncrease);
   self.writeLog('minutesRamp: ' + self.minutesRamp);
 };
-};
 
 // izmjene za dane
 SleepWakePlugin.prototype.scheduleSleep = function () {
