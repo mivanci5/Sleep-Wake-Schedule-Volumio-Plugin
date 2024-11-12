@@ -109,6 +109,8 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       uiconf.sections[1].content[2].value = self.config.get('Sun_wakeTime') || '07:00'; // dodano za dane
 
       // Updating other UI configuration options
+      uiconf.sections[0].content[1].value = self.config.get('volumeDecrease') || 1;
+      uiconf.sections[0].content[2].value = self.config.get('minutesFade') || 10;
       uiconf.sections[1].content[3].value = self.config.get('startVolume') || 20;
       uiconf.sections[1].content[4].value = self.config.get('playlist') || '';
       uiconf.sections[1].content[5].value = self.config.get('volumeIncrease') || 1;
@@ -154,7 +156,7 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   self.writeLog('Saving sleep settings');
   Object.keys(sleepTimes).forEach(function (key) {
     if (sleepTimes[key] !== undefined) {
-      self.config.set(key, sleepTimes[key]);
+      self.config.set(key, sleepTimes[key]); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
       self.writeLog('Set ' + key + ' to ' + sleepTimes[key]);
     }
   });
@@ -163,7 +165,7 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   self.writeLog('Saving wake settings');
   Object.keys(wakeTimes).forEach(function (key) {
     if (wakeTimes[key] !== undefined) {
-      self.config.set(key, wakeTimes[key]);
+      self.config.set(key, wakeTimes[key]); // Dodano - izmijenjeno za ispravno učitavanje - spremanje
       self.writeLog('Set ' + key + ' to ' + wakeTimes[key]);
     }
   });
