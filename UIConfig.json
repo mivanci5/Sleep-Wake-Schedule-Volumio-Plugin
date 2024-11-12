@@ -24,10 +24,26 @@
       },
       "content": [
         {
-          "id": "sleepTime",
+          "id": "Mon_Fri_sleepTime",
           "element": "input",
           "type": "text",
-          "label": "Sleep Time (HH:MM)",
+          "label": "Mon-Fri Sleep Time  (HH:MM)",
+          "value": "22:00",
+          "placeholder": "HH:MM (e.g., 22:00)"
+        },
+        {
+          "id": "Sat_sleepTime",
+          "element": "input",
+          "type": "text",
+          "label": "Saturday Sleep Time  (HH:MM)",
+          "value": "22:00",
+          "placeholder": "HH:MM (e.g., 22:00)"
+        },
+        {
+          "id": "Sun_sleepTime",
+          "element": "input",
+          "type": "text",
+          "label": "Sunday Sleep Time  (HH:MM)",
           "value": "22:00",
           "placeholder": "HH:MM (e.g., 22:00)"
         },
@@ -71,10 +87,26 @@
       },
       "content": [
         {
-          "id": "wakeTime",
+          "id": "Mon_Fri_wakeTime",
           "element": "input",
           "type": "text",
-          "label": "Wake Time (HH:MM)",
+          "label": "Mon-Fri Wake Time    (HH:MM)",
+          "value": "07:00",
+          "placeholder": "HH:MM (e.g., 07:00)"
+        },
+        {
+          "id": "Sat_wakeTime",
+          "element": "input",
+          "type": "text",
+          "label": "Saturday Wake Time    (HH:MM)",
+          "value": "07:00",
+          "placeholder": "HH:MM (e.g., 07:00)"
+        },
+        {
+          "id": "Sun_wakeTime",
+          "element": "input",
+          "type": "text",
+          "label": "Sunday Wake Time    (HH:MM)",
           "value": "07:00",
           "placeholder": "HH:MM (e.g., 07:00)"
         },
