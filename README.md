@@ -1,55 +1,84 @@
+Description
 
-Volumio Sleep-Wake Schedule Plugin
-Overview
-The Volumio Sleep-Wake Schedule Plugin is designed to enhance your Volumio experience by adding sleep and wake-up automation features. This plugin allows you to schedule when Volumio should fade out the volume and stop playback at night and when it should gradually increase the volume and start a specific playlist in the morning.
+The Sleep-Wake Schedule Plugin for Volumio allows users to automate the system's playback behavior, such as volume fading and music playback, during predefined sleep and wake-up times. This plugin is perfect for those who want to schedule their music playback experience around bedtime and morning routines.
 
-Features
-Sleep Mode: Automatically fades out the volume and stops playback at a specified time.
-Wake Mode: Gradually increases the volume and starts a playlist at a set wake-up time.
-Configurable Volume Levels: Set the desired volume level for wake-up.
-Flexible Scheduling: Define sleep and wake times to fit your routine.
-Easy Configuration: Intuitive UI for setting sleep and wake parameters.
-Installation
-To install the plugin, follow these steps:
+Key Features:
 
-Clone the repository:
-bash:
+Gradually fade the volume out when it's time for sleep.
 
-git clone https://github.com/mivanci5/sleep-wake-schedule-volumio-plugin.git
+Gradually ramp the volume up and start a specific playlist when waking up.
+
+Customizable settings for how much the volume should increase or decrease during wake-up or sleep.
+
+User-friendly UI configuration to manage all settings from Volumio's interface.
+
+Installation Instructions
+
+Follow these steps to install the Sleep-Wake Schedule Plugin for Volumio:
+
+Clone the Repository
+
+git clone https://github.com/mivanci5/Sleep-Wake-Schedule-Volumio-Plugin.git
+
+Navigate to the directory where you want to clone the repository and execute the above command.
+
+Navigate to the Plugin Directory
+
+cd Sleep-Wake-Schedule-Volumio-Plugin
+
+Install pugin with comand
 
 volumio plugin install
 
+Restart Volumio
+To activate the plugin, you may need to restart Volumio:
 
-Enable the plugin via the Volumio web interface.
+sudo systemctl restart volumio
 
-Configuration
-Once the plugin is installed, you can access its settings in the Volumio web UI:
+Enable Plugin
 
-Go to Settings > Plugins > System Controller.
-Select Sleep-Wake Schedule Plugin.
-Set the desired Sleep Time, Wake Time, Start Volume, and Playlist.
-Configuration Options
-Sleep Time: The time at which Volumio will fade out and stop playback.
-Wake Time: The time at which Volumio will wake up, gradually increase volume, and play a specified playlist.
-Start Volume: The initial volume level to start with during wake-up.
-Playlist: The name of the playlist to start playing upon waking up.
-Usage
-The plugin schedules sleep and wake tasks based on the settings provided. The sleep functionality will gradually reduce the volume to zero before stopping playback, while the wake function will increase the volume step-by-step and start a selected playlist.
+Go to the Volumio web UI.
 
-Example
-Sleep Time: 22:00 — Volumio will fade out at 10 PM.
-Wake Time: 07:00 — Volumio will start increasing volume at 7 AM and play your morning playlist.
-Start Volume: 35 — The wake-up volume level.
-Playlist: Morning Vibes — The playlist that starts playing during wake-up.
-Logs and Debugging
-The plugin generates logs to help with troubleshooting:
+Navigate to Plugins.
 
-bash
-Copy code
-tail -f /data/plugins/system_controller/sleep-wake-schedule-volumio-plugin/sleep-wake-plugin.log
-Contributing
-Contributions are welcome! Please fork the repository and submit a pull request with any improvements or bug fixes.
+Find the Sleep-Wake Schedule Plugin under System.
+
+Click Enable.
+
+Configuration Instructions
+
+Once the plugin is enabled, you can configure the sleep and wake-up schedules from Volumio's user interface:
+
+Access Plugin Settings:
+
+In the Volumio web UI, navigate to Settings > Plugins > System > Sleep-Wake Schedule Plugin.
+
+Sleep and Wake Settings:
+
+Sleep Settings: Set the time for the system to enter sleep mode (e.g., fade volume to zero and stop playback).
+
+Wake Settings: Configure the wake-up time, start volume, playlist, and how quickly the volume should increase.
+
+Usage Example
+
+Set Sleep Time to 22:30, with a gradual volume decrease over 15 minutes.
+
+Configure Wake Time to 07:00, starting at volume level 20, and play your favorite morning playlist.
+
+Troubleshooting
+
+Settings Not Saved: If the settings don't appear to save, ensure you have clicked the Save button after making changes. You may need to restart Volumio for changes to take effect.
+
+Logs: Check the plugin log file (sleep-wake-plugin.log) located in the plugin's directory for detailed information regarding the plugin's operation. The plugin logs events such as saving settings, scheduled sleep/wake operations, and errors.
 
 License
-This project is licensed under the MIT License. See the LICENSE file for details.
 
+This plugin is released under the MIT License.
+
+Contributions
+
+Contributions are welcome! If you find a bug or have a feature request, feel free to open an issue or submit a pull request.
+
+Support
+
+If you have any questions or need support, please open an issue on the GitHub repository.
