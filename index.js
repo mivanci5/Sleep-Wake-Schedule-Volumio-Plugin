@@ -271,23 +271,24 @@ SleepWakePlugin.prototype.loadConfig = function () {
   self.writeLog('minutesRamp: ' + self.minutesRamp);
 };
 
-// Sleep proces 
 SleepWakePlugin.prototype.scheduleSleep = function () {
   const self = this;
-  
+
   self.writeLog('Scheduling sleep function started...');
   
   const now = new Date();
   const dayOfWeek = now.getDay();
-  let sleepTime;
+  let sleepTimeStr;
 
   if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
-    sleepTime = self.config.get('Mon_Fri_sleepTime') || '22:00';
+    sleepTimeStr = self.config.get('Mon_Fri_sleepTime') || '22:00';
   } else if (dayOfWeek === 6) { // Saturday
-    sleepTime = self.config.get('Sat_sleepTime') || '22:00';
+    sleepTimeStr = self.config.get('Sat_sleepTime') || '22:00';
   } else if (dayOfWeek === 0) { // Sunday
-    sleepTime = self.config.get('Sun_sleepTime') || '22:00';
+    sleepTimeStr = self.config.get('Sun_sleepTime') || '22:00';
   }
+
+  const sleepTime = self.parseTime(sleepTimeStr);
 
   if (!sleepTime) {
     self.logger.error('SleepWakePlugin - Invalid sleep time. Sleep will not be scheduled.');
@@ -295,15 +296,14 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
     return;
   }
 
-  self.writeLog('Scheduling sleep...');
-  self.writeLog('Current time: ' + now);
-  self.writeLog('Sleep time: ' + sleepTime);
-
-  // If sleepTime is before now, add one day
-  if (sleepTime <= now) sleepTime.setDate(sleepTime.getDate() + 1);
+  // If sleepTime is before now, schedule for the next day
+  if (sleepTime <= now) {
+    sleepTime.setDate(sleepTime.getDate() + 1);
+    self.writeLog('Adjusted sleep time to next day: ' + sleepTime);
+  }
 
   // Calculate the time until sleep starts (in milliseconds)
-  let timeUntilSleep = sleepTime - now;
+  const timeUntilSleep = sleepTime - now;
 
   if (self.sleepTimer) {
     clearTimeout(self.sleepTimer);
@@ -320,8 +320,6 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
   }, timeUntilSleep);
 };
 
-
-// Wakeup process
 SleepWakePlugin.prototype.scheduleWake = function () {
   const self = this;
 
@@ -329,33 +327,32 @@ SleepWakePlugin.prototype.scheduleWake = function () {
 
   const now = new Date();
   const dayOfWeek = now.getDay();
-  let wakeTime;
+  let wakeTimeStr;
 
   if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
-    wakeTime = self.config.get('Mon_Fri_wakeTime') || '07:00';
+    wakeTimeStr = self.config.get('Mon_Fri_wakeTime') || '07:00';
   } else if (dayOfWeek === 6) { // Saturday
-    wakeTime = self.config.get('Sat_wakeTime') || '07:00';
+    wakeTimeStr = self.config.get('Sat_wakeTime') || '07:00';
   } else if (dayOfWeek === 0) { // Sunday
-    wakeTime = self.config.get('Sun_wakeTime') || '07:00';
+    wakeTimeStr = self.config.get('Sun_wakeTime') || '07:00';
   }
 
-  const parsedWakeTime = self.parseTime(wakeTime);
+  const wakeTime = self.parseTime(wakeTimeStr);
 
-  if (!parsedWakeTime) {
+  if (!wakeTime) {
     self.logger.error('SleepWakePlugin - Invalid wake time. Wake will not be scheduled.');
     self.writeLog('Invalid wake time. Wake will not be scheduled.');
     return;
   }
 
-  self.writeLog('Scheduling wake...');
-  self.writeLog('Current time: ' + now);
-  self.writeLog('Wake time: ' + wakeTime);
-
-  // If wakeTime is before now, add one day
-  if (wakeTime <= now) wakeTime.setDate(wakeTime.getDate() + 1);
+  // If wakeTime is before now, schedule for the next day
+  if (wakeTime <= now) {
+    wakeTime.setDate(wakeTime.getDate() + 1);
+    self.writeLog('Adjusted wake time to next day: ' + wakeTime);
+  }
 
   // Calculate the time until wake starts (in milliseconds)
-  let timeUntilWake = wakeTime - now;
+  const timeUntilWake = wakeTime - now;
 
   if (self.wakeTimer) {
     clearTimeout(self.wakeTimer);
@@ -371,6 +368,7 @@ SleepWakePlugin.prototype.scheduleWake = function () {
     self.startPlaylist();
   }, timeUntilWake);
 };
+
 
 
   self.logger.info('SleepWakePlugin - Wake scheduled in ' + timeUntilWake + ' milliseconds');
