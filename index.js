@@ -80,7 +80,7 @@ SleepWakePlugin.prototype.onStop = function () {
   return defer.promise;
 };
 
-// izmjene za dane
+// Get data for settings GUI
 SleepWakePlugin.prototype.getUIConfig = function () {
   const self = this;
   const defer = libQ.defer();
@@ -141,7 +141,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
   return defer.promise;
 };
 
-// izmjene za dane
+// Save data to Config.json
 SleepWakePlugin.prototype.saveOptions = function (data) {
   const self = this;
 
@@ -232,7 +232,7 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   return libQ.resolve();
 };
 
-// izmjene za dane
+// Loading data from Config.json
 SleepWakePlugin.prototype.loadConfig = function () {
   const self = this;
 
@@ -267,7 +267,9 @@ SleepWakePlugin.prototype.loadConfig = function () {
 // Sleep proces 
 SleepWakePlugin.prototype.scheduleSleep = function () {
   const self = this;
-
+  
+  self.writeLog('Scheduling sleep function started...');
+  
   const now = new Date();
   const dayOfWeek = now.getDay();
   let sleepTime;
@@ -312,9 +314,11 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
 };
 
 
-// izmjene za dane
+// Wakeup process
 SleepWakePlugin.prototype.scheduleWake = function () {
   const self = this;
+
+  self.writeLog('Scheduling wake function started...');
 
   const now = new Date();
   const dayOfWeek = now.getDay();
