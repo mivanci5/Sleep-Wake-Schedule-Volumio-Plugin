@@ -233,7 +233,8 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
 
   self.logger.info('SleepWakePlugin - Settings saved');
   self.writeLog('Settings saved.');
-  
+    // Ponovno pokreni plugin kako bi se pokrenuli procesi za sleep i wake
+  self.onStart();
   // Re-schedule sleep and wake with updated settings
   // self.writeLog('Re-scheduling sleep and wake timers with new configuration...');
   // self.scheduleSleep();  // Zakazivanje procesa za spavanje
