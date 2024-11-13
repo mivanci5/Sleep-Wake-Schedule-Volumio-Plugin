@@ -68,12 +68,12 @@ SleepWakePlugin.prototype.onStop = function () {
   // Clear timers
 if (self.sleepTimer !== undefined) {
   clearTimeout(self.sleepTimer);
-  self.writeLog('Cleared existing sleep timer.');
+  self.writeLog('Cleared existing sleep timer.func onStop');
   self.sleepTimer = undefined;
 }
 if (self.wakeTimer !== undefined) {
   clearTimeout(self.wakeTimer);
-  self.writeLog('Cleared existing wake timer.');
+  self.writeLog('Cleared existing wake timer.func onStop');
   self.wakeTimer = undefined;
 }
 
@@ -229,12 +229,12 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   // Clear timers
 if (self.sleepTimer !== undefined) {
   clearTimeout(self.sleepTimer);
-  self.writeLog('Cleared existing sleep timer.');
+  self.writeLog('Cleared existing sleep timer.func saveOption');
   self.sleepTimer = undefined;
 }
 if (self.wakeTimer !== undefined) {
   clearTimeout(self.wakeTimer);
-  self.writeLog('Cleared existing wake timer.');
+  self.writeLog('Cleared existing wake timer.func saveOption');
   self.wakeTimer = undefined;
 }
 
@@ -319,7 +319,7 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
 
   if (self.sleepTimer) {
     clearTimeout(self.sleepTimer);
-    self.writeLog('Cleared existing sleep timer.');
+    self.writeLog('Cleared existing sleep timer.func scheduleSleep()');
   }
 
   self.logger.info('SleepWakePlugin - Sleep scheduled in ' + timeUntilSleep + ' milliseconds');
@@ -368,7 +368,7 @@ SleepWakePlugin.prototype.scheduleWake = function () {
 
   if (self.wakeTimer) {
     clearTimeout(self.wakeTimer);
-    self.writeLog('Cleared existing wake timer.');
+    self.writeLog('Cleared existing wake timer.- func scheduleWake()');
   }
 
   self.logger.info('SleepWakePlugin - Wake scheduled in ' + timeUntilWake + ' milliseconds');
