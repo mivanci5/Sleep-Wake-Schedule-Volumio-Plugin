@@ -236,9 +236,7 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   // self.writeLog('Re-scheduling sleep and wake timers with new configuration...');
   // self.scheduleSleep();  // Zakazivanje procesa za spavanje
   // self.scheduleWake();   // Zakazivanje procesa za buđenje
-  // return libQ.resolve();
-  defer.resolve();
-  return defer.promise; // Vraćamo obećanje kako bismo osigurali da se proces završi
+  return libQ.resolve();
 };
 
 // Loading data from Config.json
