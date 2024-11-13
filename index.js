@@ -7,7 +7,7 @@ const config = new (require('v-conf'))();
 const os = require('os');
 const http = require('http');
 
-module.exports = SleepWakePlugin;
+module.exports = sleep-wake-schedule-volumio-plugin;
 
 function SleepWakePlugin(context) {
   const self = this;
