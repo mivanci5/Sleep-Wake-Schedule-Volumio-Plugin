@@ -147,7 +147,9 @@ SleepWakePlugin.prototype.getUIConfig = function () {
 // Save data to Config.json
 SleepWakePlugin.prototype.saveOptions = function (data) {
   const self = this;
-
+  // Inicijalizacija defer objekta
+  const defer = libQ.defer();
+  
   self.logger.info('SleepWakePlugin - saveOptions');
   self.writeLog('Saving options. Data received: ' + JSON.stringify(data));
 
