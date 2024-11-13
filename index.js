@@ -66,14 +66,16 @@ SleepWakePlugin.prototype.onStop = function () {
   self.writeLog('Plugin stopped.');
 
   // Clear timers
-  if (self.sleepTimer) {
-    clearTimeout(self.sleepTimer);
-    self.writeLog('Cleared sleep timer.');
-  }
-  if (self.wakeTimer) {
-    clearTimeout(self.wakeTimer);
-    self.writeLog('Cleared wake timer.');
-  }
+if (self.sleepTimer !== undefined) {
+  clearTimeout(self.sleepTimer);
+  self.writeLog('Cleared existing sleep timer.');
+  self.sleepTimer = undefined;
+}
+if (self.wakeTimer !== undefined) {
+  clearTimeout(self.wakeTimer);
+  self.writeLog('Cleared existing wake timer.');
+  self.wakeTimer = undefined;
+}
 
   // Reset state flags
   self.isSleeping = false;
@@ -148,7 +150,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
 SleepWakePlugin.prototype.saveOptions = function (data) {
   const self = this;
   // Inicijalizacija defer objekta
-  const defer = libQ.defer();
+  // const defer = libQ.defer();
   
   self.logger.info('SleepWakePlugin - saveOptions');
   self.writeLog('Saving options. Data received: ' + JSON.stringify(data));
@@ -224,24 +226,29 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
     self.writeLog('Set minutesRamp to ' + minutesRamp);
   }
 
+  // Clear timers
+if (self.sleepTimer !== undefined) {
+  clearTimeout(self.sleepTimer);
+  self.writeLog('Cleared existing sleep timer.');
+  self.sleepTimer = undefined;
+}
+if (self.wakeTimer !== undefined) {
+  clearTimeout(self.wakeTimer);
+  self.writeLog('Cleared existing wake timer.');
+  self.wakeTimer = undefined;
+}
+
   // Save configuration to disk
-  self.writeLog('Save configuration on disk');
   self.config.save();
   self.writeLog('Configuration saved.');
-  
-  self.commandRouter.pushToastMessage('success', 'Settings Saved', 'Your settings have been saved.');
 
-  self.logger.info('SleepWakePlugin - Settings saved');
-  self.writeLog('Settings saved.');
-    // Ponovno pokreni plugin kako bi se pokrenuli procesi za sleep i wake
-  self.onStart();
-  // Re-schedule sleep and wake with updated settings
-  // self.writeLog('Re-scheduling sleep and wake timers with new configuration...');
-  // self.scheduleSleep();  // Zakazivanje procesa za spavanje
-  // self.scheduleWake();   // Zakazivanje procesa za buđenje
+  self.loadConfig(); // Učitaj novu konfiguraciju pre zakazivanja
+  // Re-schedule sleep and wake processes
+  self.scheduleSleep();
+  self.scheduleWake();
+
+  self.commandRouter.pushToastMessage('success', 'Settings Saved', 'Your settings have been saved.');
   return libQ.resolve();
-  //defer.resolve();
-  //return defer.promise;
 };
 
 // Loading data from Config.json
