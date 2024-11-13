@@ -513,10 +513,6 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
 
   self.logger.info('SleepWakePlugin - Starting fade out volume');
   self.writeLog('Starting fade out volume');
-
-  // const steps = 10; // Total number of volume decrease steps
-  // const interval = 2 * 60 * 1000; // 2 minutes in milliseconds
-  // let step = 0;
   
   const steps = Math.ceil(self.volumeDecrease); // dodano za proracun koraka po korisniku
   const interval = (self.minutesRamp * 60 * 1000) / steps; //pretvoreno u milisekunde
@@ -524,6 +520,13 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
 
   function decreaseVolume() {    
     try {
+          // **Proveri da li je `isSleeping` prekinut**
+      if (!self.isSleeping) {
+        self.logger.info('SleepWakePlugin - Fade out process interrupted.');
+        self.writeLog('Fade out process interrupted.');
+        return; // Prekini ako je sleep proces prekinut
+      }
+      
       if (step >= steps) {
         self.logger.info('SleepWakePlugin - Fade out complete. Stopping playback.');
         self.writeLog('Fade out complete. Stopping playback.');
@@ -595,7 +598,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
       self.writeLog('Cleared sleep timer.');
     }
     self.isSleeping = false;
-    return;
+   // return;
   }
 
   self.isWaking = true;
