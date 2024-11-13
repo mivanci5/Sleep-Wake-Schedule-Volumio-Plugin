@@ -522,19 +522,7 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
   const interval = (self.minutesRamp * 60 * 1000) / steps; //pretvoreno u milisekunde
   let step = 0;
 
-  function decreaseVolume() {
-    
-      // Proveri da li je `isSleeping` i dalje aktivan prije svakog ciklusa
-    if (!self.isSleeping) {
-      self.logger.info('SleepWakePlugin - decreseVolume() - Sleep process interrupted by wake-up.');
-      self.writeLog('decreseVolume() - Sleep process interrupted by wake-up.');
-      if (fadeTimer) {
-        clearTimeout(fadeTimer);
-      }
-      return;
-    }
-    
-    
+  function decreaseVolume() {    
     try {
       if (step >= steps) {
         self.logger.info('SleepWakePlugin - Fade out complete. Stopping playback.');
