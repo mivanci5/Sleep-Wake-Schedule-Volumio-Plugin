@@ -352,12 +352,7 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
     self.logger.info('SleepWakePlugin - Sleep timer triggered');
     self.writeLog('Sleep timer triggered.');
     self.fadeOutVolume();
-    }, timeUntilSleep);
-  
-  // Starting next day
-  setTimeout(() => {
-    self.scheduleSleep();
-  }, timeUntilSleep + 1000); // Dodatna sekunda da izbjegnemo race condition
+  }, timeUntilSleep);
 };
 
 SleepWakePlugin.prototype.scheduleWake = function () {
@@ -406,12 +401,7 @@ SleepWakePlugin.prototype.scheduleWake = function () {
     self.logger.info('SleepWakePlugin - Wake timer triggered');
     self.writeLog('Wake timer triggered.');
     self.startPlaylist();
-    }, timeUntilWake);
-  
-  // Starting next day
-  setTimeout(() => {
-    self.scheduleWake();
-  }, timeUntilWake + 1000);
+  }, timeUntilWake);
 };
 
 SleepWakePlugin.prototype.parseTime = function (timeStr) {
@@ -575,7 +565,6 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
           }
         });
         self.isSleeping = false;
-        self.scheduleSleep(); // Ponovno zakazivanje
         return;
       }
 
@@ -673,7 +662,6 @@ SleepWakePlugin.prototype.startPlaylist = function () {
         self.logger.info('SleepWakePlugin - Volume increase complete.');
         self.writeLog('Volume increase complete.');
         self.isWaking = false;
-        self.scheduleWake();
         return;
       }
 
