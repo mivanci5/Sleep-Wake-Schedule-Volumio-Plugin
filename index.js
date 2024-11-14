@@ -105,7 +105,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
     }
 
     try {
-      // Postavljanje vrijednosti za Mon-Fri, subotu i nedjelju
+      // Seting values for Mon-Fri, subotu i nedjelju
       uiconf.sections[0].content[0].value = self.config.get('Mon_Fri_sleepTime') || '22:00';
       uiconf.sections[0].content[1].value = self.config.get('Sat_sleepTime') || '22:00';
       uiconf.sections[0].content[2].value = self.config.get('Sun_sleepTime') || '22:00';
@@ -149,8 +149,6 @@ SleepWakePlugin.prototype.getUIConfig = function () {
 // Save data to Config.json
 SleepWakePlugin.prototype.saveOptions = function (data) {
   const self = this;
-  // Inicijalizacija defer objekta
-  // const defer = libQ.defer();
   
   self.logger.info('SleepWakePlugin - saveOptions');
   self.writeLog('Saving options. Data received: ' + JSON.stringify(data));
@@ -242,7 +240,7 @@ if (self.wakeTimer !== undefined) {
   self.config.save();
   self.writeLog('Configuration saved.');
 
-  self.loadConfig(); // Učitaj novu konfiguraciju pre zakazivanja
+  self.loadConfig(); // Load new config before starting wake and sleep process
   // Re-schedule sleep and wake processes
   self.scheduleSleep();
   self.scheduleWake();
@@ -598,7 +596,6 @@ SleepWakePlugin.prototype.startPlaylist = function () {
       self.writeLog('Cleared sleep timer.');
     }
     self.isSleeping = false;
-   // return;
   }
 
   self.isWaking = true;
@@ -606,12 +603,8 @@ SleepWakePlugin.prototype.startPlaylist = function () {
   self.logger.info('SleepWakePlugin - Starting playlist');
   self.writeLog('Starting playlist');
 
-  //const steps = 10; // Total number of volume increase steps
-  //const interval = 2 * 60 * 1000; // 2 minutes in milliseconds
-  //let step = 0;
-
-  const steps = Math.ceil(self.volumeIncrease); // dodano za proracun koraka po korisniku
-  const interval = (self.minutesRamp * 60 * 1000) / steps; //pretvoreno u milisekunde
+  const steps = Math.ceil(self.volumeIncrease); // counting steps
+  const interval = (self.minutesRamp * 60 * 1000) / steps; //calculates to miliseconds
   let step = 0;
   
   // Set initial volume
