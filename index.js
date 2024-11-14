@@ -353,9 +353,8 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
     self.writeLog('Sleep timer triggered.');
     self.fadeOutVolume();
     }, timeUntilSleep);
-  }
-
-  // Ponovno zakazivanje za sljedeći dan
+  
+  // Starting next day
   setTimeout(() => {
     self.scheduleSleep();
   }, timeUntilSleep + 1000); // Dodatna sekunda da izbjegnemo race condition
@@ -408,9 +407,8 @@ SleepWakePlugin.prototype.scheduleWake = function () {
     self.writeLog('Wake timer triggered.');
     self.startPlaylist();
     }, timeUntilWake);
-  }
-
-  // Ponovno zakazivanje za sljedeći dan
+  
+  // Starting next day
   setTimeout(() => {
     self.scheduleWake();
   }, timeUntilWake + 1000);
