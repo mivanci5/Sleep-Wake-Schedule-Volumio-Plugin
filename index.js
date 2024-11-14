@@ -315,7 +315,7 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
  // If sleepTime is before now, schedule for the next day
   if (sleepTime <= now) {
     let nextDay = new Date(sleepTime);
-    nextDay.setDate(now.getDate() + 1);
+    nextDay.setDate(nextDay.getDate() + 1);
     self.writeLog(`Adjusted sleep time to next day: ${nextDay}`);
     sleepTime = nextDay;
   }
