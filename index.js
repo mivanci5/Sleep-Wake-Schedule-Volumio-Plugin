@@ -603,7 +603,7 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
     }
   }
 
-  // Start the volume decrease process
+  // Start the volume decrease process one more time
   decreaseVolume();
 };
 
@@ -701,6 +701,8 @@ SleepWakePlugin.prototype.startPlaylist = function () {
       self.isWaking = false;
     }
   }
+  // Start the volume increaseVolume process one more time
+  increaseVolume();
 };
 
 SleepWakePlugin.prototype.getConfigurationFiles = function () {
