@@ -565,6 +565,8 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
           }
         });
         self.isSleeping = false;
+        // Go to  onStart() sleep finished
+        self.onStart();
         return;
       }
 
@@ -662,6 +664,8 @@ SleepWakePlugin.prototype.startPlaylist = function () {
         self.logger.info('SleepWakePlugin - Volume increase complete.');
         self.writeLog('Volume increase complete.');
         self.isWaking = false;
+        // Go to onStart() waking finished
+        self.onStart();
         return;
       }
 
