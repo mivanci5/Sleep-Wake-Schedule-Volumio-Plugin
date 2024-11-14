@@ -574,8 +574,8 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
             self.writeLog('Playback stopped.');
           }
         });
-
         self.isSleeping = false;
+        self.scheduleSleep(); // Ponovno zakazivanje
         return;
       }
 
@@ -673,6 +673,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
         self.logger.info('SleepWakePlugin - Volume increase complete.');
         self.writeLog('Volume increase complete.');
         self.isWaking = false;
+        self.scheduleWake();
         return;
       }
 
