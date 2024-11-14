@@ -6,6 +6,7 @@ const path = require('path');
 const config = new (require('v-conf'))();
 const os = require('os');
 const http = require('http');
+const MAX_LOG_SIZE = 2 * 1024 * 1024; // 2 MB
 
 module.exports = SleepWakePlugin;
 
@@ -44,6 +45,9 @@ SleepWakePlugin.prototype.onStart = function () {
   const defer = libQ.defer();
 
   self.logger.info('SleepWakePlugin - onStart');
+  
+  self.manageLogSize();  // cheking log size
+  
   self.writeLog('Plugin started.');
 
   self.loadConfig();
@@ -724,4 +728,30 @@ SleepWakePlugin.prototype.writeLog = function (message) {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] ${message}${os.EOL}`;
   fs.appendFileSync(this.logFile, logMessage, { encoding: 'utf8' });
+};
+
+
+// Nova funkcija za kontrolu veličine log datoteke
+SleepWakePlugin.prototype.manageLogSize = function () {
+  const self = this;
+
+  try {
+    // Provjera postoji li datoteka loga
+    if (fs.existsSync(self.logFile)) {
+      // Dohvati informacije o datoteci loga
+      const stats = fs.statSync(self.logFile);
+
+      // Provjera veličine log datoteke
+      if (stats.size > MAX_LOG_SIZE) {
+        // Ako je datoteka veća od 2 MB, obriši trenutnu datoteku
+        fs.unlinkSync(self.logFile);
+        
+        // Započni novi log
+        self.writeLog('Log file exceeded 2 MB. Old log file deleted, new log started.');
+      }
+    }
+  } catch (error) {
+    self.logger.error('Error managing log file size: ' + error);
+    self.writeLog('Error managing log file size: ' + error);
+  }
 };
