@@ -2,8 +2,7 @@ Description
 
 The SleepWake Plugin for Volumio is designed to automate scheduled sleep and wake-up routines for the system. It allows users to set specific times for the system to go into a "sleep" state (fade out the volume and stop playback) and a "wake" state (gradually increase the volume and start a playlist). The schedule can be customized for weekdays, Saturdays, and Sundays. The plugin also lets users adjust settings like volume fade speed, ramp-up duration, and initial volume levels.
 _____________________________________________________________________________________  
-```html
-<pre>
+```
 +-----------------------------------------------------------+
 | Sleep Wake Schedule Plugin Configuration                  |
 +-----------------------------------------------------------+
@@ -33,7 +32,7 @@ ________________________________________________________________________________
 |                        [ Save ]                           |
 |                                                           |
 +-----------------------------------------------------------+
-</pre>
+```
 
 
 ______________________________________________________________________________________
