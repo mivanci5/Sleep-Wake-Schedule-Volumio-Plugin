@@ -538,7 +538,7 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
   self.writeLog('Starting fade out volume');
   
   const steps = Math.ceil(self.volumeDecrease); // dodano za proracun koraka po korisniku
-  const interval = (self.minutesRamp * 60 * 1000) / steps; //pretvoreno u milisekunde
+  const interval = (self.minutesFade * 60 * 1000) / steps; //pretvoreno u milisekunde
   let step = 0;
 
   function decreaseVolume() {    
