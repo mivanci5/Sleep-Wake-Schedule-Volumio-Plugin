@@ -540,11 +540,12 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
 
   self.logger.info('SleepWakePlugin - Starting fade out volume');
   self.writeLog('Starting fade out volume');
-  
+
+  let step = 0;
   const steps = Math.ceil(self.volumeDecrease); // dodano za proracun koraka po korisniku
   const interval = (self.minutesFade * 60 * 1000) / steps; //pretvoreno u milisekunde
-  let step = 0;
-
+  self.writeLog(`Number of sleeping volume steps calculated: ${steps}`);
+  
   function decreaseVolume() {    
     try {
           // **Proveri da li je `isSleeping` prekinut**
@@ -632,10 +633,11 @@ SleepWakePlugin.prototype.startPlaylist = function () {
 
   self.logger.info('SleepWakePlugin - Starting playlist');
   self.writeLog('Starting playlist');
-
+  
+  let step = 0;
   const steps = Math.ceil(self.volumeIncrease); // counting steps
   const interval = (self.minutesRamp * 60 * 1000) / steps; //calculates to miliseconds
-  let step = 0;
+  self.writeLog(`Number of waking volume steps calculated: ${steps}`);
   
   // Set initial volume
   self.sendRestCommand(`/api/v1/commands/?cmd=volume&volume=${self.startVolume}`, function (err, response) {
