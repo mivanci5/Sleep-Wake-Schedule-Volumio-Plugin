@@ -314,10 +314,15 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
   
  // If sleepTime is before now, schedule for the next day
   if (sleepTime <= now) {
-    let nextDay = new Date(sleepTime);
-    nextDay.setDate(nextDay.getDate() + 1);
+    const nextDay = new Date(); // Stvori novi Date objekt
+    nextDay.setDate(nextDay.getDate() + 1); // Postavi datum na sljedeći dan
+    nextDay.setHours(sleepTime.getHours());
+    nextDay.setMinutes(sleepTime.getMinutes());
+    nextDay.setSeconds(0);
+    nextDay.setMilliseconds(0);
+
     self.writeLog(`Adjusted sleep time to next day: ${nextDay}`);
-    sleepTime = nextDay;
+    sleepTime.setTime(nextDay.getTime()); // Ažuriraj sleepTime s novim datumom i vremenom
   }
 
 
