@@ -1,6 +1,6 @@
 Description
 
-The Sleep-Wake Schedule Plugin for Volumio allows users to automate the system's playback behavior, such as volume fading and music playback, during predefined sleep and wake-up times. This plugin is perfect for those who want to schedule their music playback experience around bedtime and morning routines.
+The SleepWake Plugin for Volumio is designed to automate scheduled sleep and wake-up routines for the system. It allows users to set specific times for the system to go into a "sleep" state (fade out the volume and stop playback) and a "wake" state (gradually increase the volume and start a playlist). The schedule can be customized for weekdays, Saturdays, and Sundays. The plugin also lets users adjust settings like volume fade speed, ramp-up duration, and initial volume levels.
 _____________________________________________________________________________________  
 ```html
 <pre>
@@ -39,14 +39,64 @@ ________________________________________________________________________________
 ______________________________________________________________________________________
 Key Features:
 
-Gradually fade the volume out when it's time for sleep.
+Sleep Scheduling:
+Gradually fades out the system volume over a user-defined duration until it reaches zero, then stops playback.
+Users can configure different sleep times for weekdays, Saturdays, and Sundays.
 
-Gradually ramp the volume up and start a specific playlist when waking up.
+Wake Scheduling:
+Gradually increases the system volume to a target level and starts playing a specified playlist.
+Separate wake times can be set for weekdays, Saturdays, and Sundays.
 
-Customizable settings for how much the volume should increase or decrease during wake-up or sleep.
+User Settings:
+Settings include sleep/wake times, volume adjustments, fade duration, playlist selection, and more.
+Configurations are saved to a JSON file and can be updated through the Volumio user interface.
+Interaction Between Sleep and Wake Processes
+1. Sleep Process (fadeOutVolume)
+When the sleep process is initiated, the system starts decreasing the volume in small steps based on the volumeDecrease and minutesFade settings.
+The volume is reduced gradually until it reaches zero, after which playback is stopped.
+Interruption Handling: If the wake process is triggered while the system is still fading out to sleep, the sleep process is interrupted. This ensures that waking up takes priority, allowing music to start playing immediately with a volume ramp-up.
+2. Wake Process (startPlaylist)
+The wake process starts by setting the volume to a specified initial level (startVolume) and then playing a selected playlist.
+It then gradually increases the volume to the desired level using the volumeIncrease and minutesRamp settings.
+Interruption Handling: If the sleep process is triggered while the system is waking up (i.e., while the volume is still increasing), the wake process is interrupted. This prevents the system from trying to fade out the volume while it is simultaneously increasing it.
+Detailed Logic for Sleep and Wake Interactions
+The fadeOutVolume() function checks if the system is currently in the waking state before starting the sleep process. If the system is waking up, the sleep process is not allowed to proceed.
 
-User-friendly UI configuration to manage all settings from Volumio's interface.
+javascript code:
 
+if (self.isWaking) {
+  self.logger.warn('Cannot start sleep during wake-up process.');
+  self.writeLog('Cannot start sleep during wake-up process.');
+  return;
+}
+Similarly, in the startPlaylist() function, if the system is currently in the sleeping state, it stops the sleep process, clears any active sleep timers, and then proceeds with waking up.
+
+javascript code:
+
+if (self.isSleeping) {
+  self.logger.info('Interrupting sleep to start wake-up.');
+  self.writeLog('Interrupting sleep to start wake-up.');
+  if (self.sleepTimer) {
+    clearTimeout(self.sleepTimer);
+    self.writeLog('Cleared sleep timer.');
+  }
+  self.isSleeping = false;
+}
+
+
+Scheduling Logic
+
+The sleep and wake schedules are managed by the functions scheduleSleep() and scheduleWake(), which parse the configured times and set timers accordingly.
+If the scheduled time has already passed for the current day, the plugin adjusts the schedule to the next day.
+Configuration Management
+The plugin uses a configuration file (config.json) to store user preferences.
+The settings include:
+Mon_Fri_sleepTime, Sat_sleepTime, Sun_sleepTime
+Mon_Fri_wakeTime, Sat_wakeTime, Sun_wakeTime
+startVolume, playlist, volumeDecrease, minutesFade, volumeIncrease, minutesRamp
+Error Handling & Logging
+The plugin logs all significant events, errors, and actions to a log file (sleep-wake-plugin.log), making it easier to troubleshoot issues.
+Additional checks are in place to validate the time formats, handle network errors during REST API calls, and gracefully handle any interruptions in the sleep/wake processes.
 
 _____________________________________________________________________________________
 Installation Instructions
@@ -113,67 +163,7 @@ This plugin is released under the MIT License.
 
 
 _________________________________________________________________________________
-Overview
-
-The SleepWake Plugin for Volumio is designed to automate scheduled sleep and wake-up routines for the system. It allows users to set specific times for the system to go into a "sleep" state (fade out the volume and stop playback) and a "wake" state (gradually increase the volume and start a playlist). The schedule can be customized for weekdays, Saturdays, and Sundays. The plugin also lets users adjust settings like volume fade speed, ramp-up duration, and initial volume levels.
-
-Key Features
-Sleep Scheduling:
-
-Gradually fades out the system volume over a user-defined duration until it reaches zero, then stops playback.
-Users can configure different sleep times for weekdays, Saturdays, and Sundays.
-Wake Scheduling:
-
-Gradually increases the system volume to a target level and starts playing a specified playlist.
-Separate wake times can be set for weekdays, Saturdays, and Sundays.
-User Settings:
-
-Settings include sleep/wake times, volume adjustments, fade duration, playlist selection, and more.
-Configurations are saved to a JSON file and can be updated through the Volumio user interface.
-Interaction Between Sleep and Wake Processes
-1. Sleep Process (fadeOutVolume)
-When the sleep process is initiated, the system starts decreasing the volume in small steps based on the volumeDecrease and minutesFade settings.
-The volume is reduced gradually until it reaches zero, after which playback is stopped.
-Interruption Handling: If the wake process is triggered while the system is still fading out to sleep, the sleep process is interrupted. This ensures that waking up takes priority, allowing music to start playing immediately with a volume ramp-up.
-2. Wake Process (startPlaylist)
-The wake process starts by setting the volume to a specified initial level (startVolume) and then playing a selected playlist.
-It then gradually increases the volume to the desired level using the volumeIncrease and minutesRamp settings.
-Interruption Handling: If the sleep process is triggered while the system is waking up (i.e., while the volume is still increasing), the wake process is interrupted. This prevents the system from trying to fade out the volume while it is simultaneously increasing it.
-Detailed Logic for Sleep and Wake Interactions
-The fadeOutVolume() function checks if the system is currently in the waking state before starting the sleep process. If the system is waking up, the sleep process is not allowed to proceed.
-
-javascript
-Copy code
-if (self.isWaking) {
-  self.logger.warn('Cannot start sleep during wake-up process.');
-  self.writeLog('Cannot start sleep during wake-up process.');
-  return;
-}
-Similarly, in the startPlaylist() function, if the system is currently in the sleeping state, it stops the sleep process, clears any active sleep timers, and then proceeds with waking up.
-
-javascript
-Copy code
-if (self.isSleeping) {
-  self.logger.info('Interrupting sleep to start wake-up.');
-  self.writeLog('Interrupting sleep to start wake-up.');
-  if (self.sleepTimer) {
-    clearTimeout(self.sleepTimer);
-    self.writeLog('Cleared sleep timer.');
-  }
-  self.isSleeping = false;
-}
-Scheduling Logic
-The sleep and wake schedules are managed by the functions scheduleSleep() and scheduleWake(), which parse the configured times and set timers accordingly.
-If the scheduled time has already passed for the current day, the plugin adjusts the schedule to the next day.
-Configuration Management
-The plugin uses a configuration file (config.json) to store user preferences.
-The settings include:
-Mon_Fri_sleepTime, Sat_sleepTime, Sun_sleepTime
-Mon_Fri_wakeTime, Sat_wakeTime, Sun_wakeTime
-startVolume, playlist, volumeDecrease, minutesFade, volumeIncrease, minutesRamp
-Error Handling & Logging
-The plugin logs all significant events, errors, and actions to a log file (sleep-wake-plugin.log), making it easier to troubleshoot issues.
-Additional checks are in place to validate the time formats, handle network errors during REST API calls, and gracefully handle any interruptions in the sleep/wake processes.
 Conclusion
+
 This plugin offers robust scheduling features for automated sleep and wake routines in Volumio, making it ideal for users who want to automate their music listening schedules. The seamless handling of conflicts between sleep and wake processes ensures smooth transitions, prioritizing wake-up over sleep when necessary.
 
