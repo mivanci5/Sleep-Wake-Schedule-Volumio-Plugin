@@ -541,10 +541,11 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
   self.logger.info('SleepWakePlugin - Starting fade out volume');
   self.writeLog('Starting fade out volume');
 
+ 
+  const stepsSleep = Math.ceil(self.volumeDecrease); // dodano za proracun koraka po korisniku
+  const intervalSleep = (self.minutesFade * 60 * 1000) / stepsSleep; //pretvoreno u milisekunde
+  self.writeLog(`Number of sleeping volume steps calculated: ${stepsSleep}`);
   let step = 0;
-  const steps = Math.ceil(self.volumeDecrease); // dodano za proracun koraka po korisniku
-  const interval = (self.minutesFade * 60 * 1000) / steps; //pretvoreno u milisekunde
-  self.writeLog(`Number of sleeping volume steps calculated: ${steps}`);
   
   function decreaseVolume() {    
     try {
@@ -555,7 +556,7 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
         return; // Prekini ako je sleep proces prekinut
       }
       
-      if (step >= steps) {
+      if (step >= stepsSleep) {
         self.logger.info('SleepWakePlugin - Fade out complete. Stopping playback.');
         self.writeLog('Fade out complete. Stopping playback.');
 
@@ -598,7 +599,7 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
           }
 
           step++;
-          setTimeout(decreaseVolume, interval);
+          setTimeout(decreaseVolume, intervalSleep);
         });
       });
     } catch (error) {
@@ -634,10 +635,12 @@ SleepWakePlugin.prototype.startPlaylist = function () {
   self.logger.info('SleepWakePlugin - Starting playlist');
   self.writeLog('Starting playlist');
   
-  let step = 0;
+  
   const steps = Math.ceil(self.volumeIncrease); // counting steps
   const interval = (self.minutesRamp * 60 * 1000) / steps; //calculates to miliseconds
   self.writeLog(`Number of waking volume steps calculated: ${steps}`);
+
+  let step = 0;
   
   // Set initial volume
   self.sendRestCommand(`/api/v1/commands/?cmd=volume&volume=${self.startVolume}`, function (err, response) {
