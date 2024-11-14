@@ -223,18 +223,29 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
     self.config.set('minutesRamp', minutesRamp);
     self.writeLog('Set minutesRamp to ' + minutesRamp);
   }
-
-  // Clear timers
-if (self.sleepTimer !== undefined) {
-  clearTimeout(self.sleepTimer);
-  self.writeLog('Cleared existing sleep timer.func saveOption');
-  self.sleepTimer = undefined;
-}
-if (self.wakeTimer !== undefined) {
-  clearTimeout(self.wakeTimer);
-  self.writeLog('Cleared existing wake timer.func saveOption');
-  self.wakeTimer = undefined;
-}
+  
+    // Stop all fading and rumpup and scheduleSleep and ScheduleWake
+  if (self.isSleeping) {
+     self.writeLog('Interrupting active sleep process.');
+    self.isSleeping = false;
+  }
+  
+  if (self.isWaking) {
+    self.writeLog('Interrupting active wake process.');
+    self.isWaking = false;
+  }
+  
+    // Clear timers
+  if (self.sleepTimer !== undefined) {
+    clearTimeout(self.sleepTimer);
+    self.writeLog('Cleared existing sleep timer.func saveOption');
+    self.sleepTimer = undefined;
+  }
+  if (self.wakeTimer !== undefined) {
+    clearTimeout(self.wakeTimer);
+    self.writeLog('Cleared existing wake timer.func saveOption');
+    self.wakeTimer = undefined;
+  }
 
   // Save configuration to disk
   self.config.save();
@@ -341,7 +352,13 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
     self.logger.info('SleepWakePlugin - Sleep timer triggered');
     self.writeLog('Sleep timer triggered.');
     self.fadeOutVolume();
-  }, timeUntilSleep);
+    }, timeUntilSleep);
+  }
+
+  // Ponovno zakazivanje za sljedeći dan
+  setTimeout(() => {
+    self.scheduleSleep();
+  }, timeUntilSleep + 1000); // Dodatna sekunda da izbjegnemo race condition
 };
 
 SleepWakePlugin.prototype.scheduleWake = function () {
@@ -390,7 +407,13 @@ SleepWakePlugin.prototype.scheduleWake = function () {
     self.logger.info('SleepWakePlugin - Wake timer triggered');
     self.writeLog('Wake timer triggered.');
     self.startPlaylist();
-  }, timeUntilWake);
+    }, timeUntilWake);
+  }
+
+  // Ponovno zakazivanje za sljedeći dan
+  setTimeout(() => {
+    self.scheduleWake();
+  }, timeUntilWake + 1000);
 };
 
 SleepWakePlugin.prototype.parseTime = function (timeStr) {
