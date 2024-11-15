@@ -669,7 +669,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
 
   function increaseVolume() {
     try {
-      if (stepWake >= steps) {
+      if (stepWake > steps) {
         self.logger.info('SleepWakePlugin - Volume increase complete.');
         self.writeLog('Volume increase complete.');
         self.isWaking = false;
