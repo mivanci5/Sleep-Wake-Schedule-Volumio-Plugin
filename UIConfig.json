@@ -1,6 +1,6 @@
 {
   "page": {
-    "label": "Sleep Wake Schedule Plugin Configuration",
+    "label": "Sleep Wake Schedule Configuration",
     "icon": "fa-clock-o"
   },
   "sections": [
@@ -11,23 +11,41 @@
       "icon": "fa-moon-o",
       "onSave": {
         "type": "controller",
-        "endpoint": "system_controller/sleep-wake-schedule-volumio-plugin",
+        "endpoint": "system_controller/SleepWakePlugin",
         "method": "saveOptions"
       },
       "saveButton": {
         "label": "Save",
         "data": [
-          "sleepTime",
+          "Mon_Fri_sleepTime",
+          "Sat_sleepTime",
+          "Sun_sleepTime",
           "volumeDecrease",
           "minutesFade"
         ]
       },
       "content": [
         {
-          "id": "sleepTime",
+          "id": "Mon_Fri_sleepTime",
           "element": "input",
           "type": "text",
-          "label": "Sleep Time (HH:MM)",
+          "label": "Mon-Fri Sleep Time  (HH:MM)",
+          "value": "22:00",
+          "placeholder": "HH:MM (e.g., 22:00)"
+        },
+        {
+          "id": "Sat_sleepTime",
+          "element": "input",
+          "type": "text",
+          "label": "Saturday Sleep Time  (HH:MM)",
+          "value": "22:00",
+          "placeholder": "HH:MM (e.g., 22:00)"
+        },
+        {
+          "id": "Sun_sleepTime",
+          "element": "input",
+          "type": "text",
+          "label": "Sunday Sleep Time  (HH:MM)",
           "value": "22:00",
           "placeholder": "HH:MM (e.g., 22:00)"
         },
@@ -56,13 +74,15 @@
       "icon": "fa-sun-o",
       "onSave": {
         "type": "controller",
-        "endpoint": "system_controller/sleep-wake-schedule-volumio-plugin",
+        "endpoint": "system_controller/SleepWakePlugin",
         "method": "saveOptions"
       },
       "saveButton": {
         "label": "Save",
         "data": [
-          "wakeTime",
+          "Mon_Fri_wakeTime",
+          "Sat_wakeTime",
+          "Sun_wakeTime",
           "startVolume",
           "playlist",
           "volumeIncrease",
@@ -71,10 +91,26 @@
       },
       "content": [
         {
-          "id": "wakeTime",
+          "id": "Mon_Fri_wakeTime",
           "element": "input",
           "type": "text",
-          "label": "Wake Time (HH:MM)",
+          "label": "Mon-Fri Wake Time    (HH:MM)",
+          "value": "07:00",
+          "placeholder": "HH:MM (e.g., 07:00)"
+        },
+        {
+          "id": "Sat_wakeTime",
+          "element": "input",
+          "type": "text",
+          "label": "Saturday Wake Time    (HH:MM)",
+          "value": "07:00",
+          "placeholder": "HH:MM (e.g., 07:00)"
+        },
+        {
+          "id": "Sun_wakeTime",
+          "element": "input",
+          "type": "text",
+          "label": "Sunday Wake Time    (HH:MM)",
           "value": "07:00",
           "placeholder": "HH:MM (e.g., 07:00)"
         },
