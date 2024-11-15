@@ -416,23 +416,43 @@ SleepWakePlugin.prototype.scheduleWake = function () {
     return;
   }
 
-  // If wakeTime is before now, schedule for the next day
+  // Ako je vrijeme buđenja već prošlo za trenutni dan, zakazujemo ga za sljedeći dan
   if (wakeTime <= now) {
-    wakeTime.setDate(wakeTime.getDate() + 1); // Povećavamo datum za jedan dan
-    dayOfWeek = (dayOfWeek + 1) % 7; // Ažuriramo dan u tjednu za sljedeći dan
+    const nextDay = new Date(); // Stvori novi Date objekt
+    nextDay.setDate(nextDay.getDate() + 1); // Postavi datum na sljedeći dan
+    nextDay.setHours(wakeTime.getHours()); // Postavi sate iz originalnog wakeTime objekta
+    nextDay.setMinutes(wakeTime.getMinutes()); // Postavi minute iz originalnog wakeTime objekta
+    nextDay.setSeconds(0);
+    nextDay.setMilliseconds(0);
 
-    // Ponovno postavljanje vremena za sljedeći dan prema ažuriranom danu
-    if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Ponedjeljak do petak
-      wakeTimeStr = self.config.get('Mon_Fri_wakeTime') || '07:00';
-    } else if (dayOfWeek === 6) { // Subota
-      wakeTimeStr = self.config.get('Sat_wakeTime') || '07:00';
-    } else if (dayOfWeek === 0) { // Nedjelja
-      wakeTimeStr = self.config.get('Sun_wakeTime') || '07:00';
+    self.writeLog(`Adjusted wake time to next day: ${nextDay}`);
+
+    // Ažuriraj wakeTime s novim datumom i vremenom
+    wakeTime.setTime(nextDay.getTime());
+
+    // Ponovno provjeri da li je potrebno parsirati vrijeme za novi dan
+    const newDayOfWeek = nextDay.getDay();
+    let newWakeTimeStr;
+
+    if (newDayOfWeek >= 1 && newDayOfWeek <= 5) { // Ponedjeljak do petak
+      newWakeTimeStr = self.config.get('Mon_Fri_wakeTime') || '07:00';
+    } else if (newDayOfWeek === 6) { // Subota
+      newWakeTimeStr = self.config.get('Sat_wakeTime') || '07:00';
+    } else if (newDayOfWeek === 0) { // Nedjelja
+      newWakeTimeStr = self.config.get('Sun_wakeTime') || '07:00';
     }
 
-    wakeTime = self.parseTime(wakeTimeStr);
-    wakeTime.setDate(now.getDate() + 1); // Ažuriramo datum za sljedeći dan
-    self.writeLog(`Adjusted wake time to next day: ${wakeTime}`);
+    // Ako se razlikuje od originalnog vremena, ponovno parsiraj vrijeme
+    if (newWakeTimeStr !== wakeTimeStr) {
+      wakeTime = self.parseTime(newWakeTimeStr);
+      if (!wakeTime) {
+        self.logger.error('SleepWakePlugin - Invalid wake time for next day. Wake will not be scheduled.');
+        self.writeLog('Invalid wake time for next day. Wake will not be scheduled.');
+        return;
+      }
+      wakeTime.setDate(nextDay.getDate()); // Postavljamo datum na sljedeći dan
+      self.writeLog(`Re-adjusted wake time after parsing for next day: ${wakeTime}`);
+    }
   }
 
   // Calculate the time until wake starts (in milliseconds)
