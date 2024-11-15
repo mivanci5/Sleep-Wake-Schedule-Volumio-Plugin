@@ -540,6 +540,10 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
   self.writeLog(`Number of sleeping volume steps calculated: ${stepsSleep}`);
   let step = 1;
   
+  // Start the volume decrease process one more time
+  decreaseVolume();
+  
+
   function decreaseVolume() {    
     try {
           // **Proveri da li je `isSleeping` prekinut**
