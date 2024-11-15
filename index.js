@@ -313,7 +313,7 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
     sleepTimeStr = self.config.get('Sun_sleepTime') || '22:00';
   }
 
-  const sleepTime = self.parseTime(sleepTimeStr);
+  let sleepTime = self.parseTime(sleepTimeStr);
 
   if (!sleepTime) {
     self.logger.error('SleepWakePlugin - Invalid sleep time. Sleep will not be scheduled.');
@@ -408,7 +408,7 @@ SleepWakePlugin.prototype.scheduleWake = function () {
     wakeTimeStr = self.config.get('Sun_wakeTime') || '07:00';
   }
 
-  const wakeTime = self.parseTime(wakeTimeStr);
+  let wakeTime = self.parseTime(wakeTimeStr);
 
   if (!wakeTime) {
     self.logger.error('SleepWakePlugin - Invalid wake time. Wake will not be scheduled.');
