@@ -640,7 +640,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
   const interval = (self.minutesRamp * 60 * 1000) / steps; //calculates to miliseconds
   self.writeLog(`Number of waking volume steps calculated: ${steps}`);
 
-  let step = 0;
+  let stepWake = 0;
   
   // Set initial volume
   self.sendRestCommand(`/api/v1/commands/?cmd=volume&volume=${self.startVolume}`, function (err, response) {
@@ -669,7 +669,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
 
   function increaseVolume() {
     try {
-      if (step >= steps) {
+      if (stepWake >= steps) {
         self.logger.info('SleepWakePlugin - Volume increase complete.');
         self.writeLog('Volume increase complete.');
         self.isWaking = false;
@@ -677,7 +677,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
         self.onStart();
         return;
       }
-
+      
       self.getCurrentVolume(function (err, currentVolume) {
         if (err) {
           self.logger.error('Error getting current volume: ' + err);
@@ -700,7 +700,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
             self.writeLog(`Volume set to ${newVolume}`);
           }
 
-          step++;
+          stepWake++;
           setTimeout(increaseVolume, interval);
         });
       });
