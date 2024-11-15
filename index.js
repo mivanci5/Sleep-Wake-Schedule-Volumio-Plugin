@@ -321,21 +321,10 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
     return;
   }
 
- // if (sleepTime <= now) {
- //   const nextDay = new Date(); // Stvori novi Date objekt
- //   nextDay.setDate(nextDay.getDate() + 1); // Postavi datum na sljedeći dan
- //   nextDay.setHours(sleepTime.getHours());
- //   nextDay.setMinutes(sleepTime.getMinutes());
- //   nextDay.setSeconds(0);
- //   nextDay.setMilliseconds(0);
-
- //   self.writeLog(`Adjusted sleep time to next day: ${nextDay}`);
- //   sleepTime.setTime(nextDay.getTime()); // Ažuriraj sleepTime s novim datumom i vremenom
- // }
-  
+// check day and schedule new day if time is in the past  
   if (sleepTime <= now) {
-    let nextDayForSleep = new Date(); // Stvori novi Date objekt za spavanje
-    nextDayForSleep.setDate(nextDayForSleep.getDate() + 1); // Postavljamo datum na sljedeći dan
+    let nextDayForSleep = new Date();
+    nextDayForSleep.setDate(nextDayForSleep.getDate() + 1);
     nextDayForSleep.setHours(sleepTime.getHours());
     nextDayForSleep.setMinutes(sleepTime.getMinutes());
     nextDayForSleep.setSeconds(0);
@@ -343,10 +332,10 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
 
     self.writeLog(`Adjusted sleep time to next day: ${nextDayForSleep}`);
 
-    // Ažuriramo `sleepTime` s novim objektom
+    // update`sleepTime` new objekt
     sleepTime = nextDayForSleep;
 
-    // Ponovno provjeravanje postavki za novi dan
+    // Check day in week again
     const newDayOfWeek = nextDayForSleep.getDay();
     let newSleepTimeStr;
 
@@ -358,7 +347,7 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
       newSleepTimeStr = self.config.get('Sun_sleepTime') || '22:00';
     }
 
-    // Ako se razlikuje od originalnog vremena, ponovno parsiramo vrijeme
+    // If there is change, parse new time. 
     if (newSleepTimeStr !== sleepTimeStr) {
       const reParsedTime = self.parseTime(newSleepTimeStr);
       if (!reParsedTime) {
@@ -416,9 +405,9 @@ SleepWakePlugin.prototype.scheduleWake = function () {
     return;
   }
 
- // Ako je vrijeme buđenja već prošlo za trenutni dan, zakazujemo ga za sljedeći dan
+ // Check if time is in past
   if (wakeTime <= now) {
-    let nextDayForWake = new Date(); // Stvori novi Date objekt za buđenje
+    let nextDayForWake = new Date(); 
     nextDayForWake.setDate(nextDayForWake.getDate() + 1);
     nextDayForWake.setHours(wakeTime.getHours());
     nextDayForWake.setMinutes(wakeTime.getMinutes());
