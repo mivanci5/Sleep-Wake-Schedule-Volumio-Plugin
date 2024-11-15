@@ -640,7 +640,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
   const interval = (self.minutesRamp * 60 * 1000) / steps; //calculates to miliseconds
   self.writeLog(`Number of waking volume steps calculated: ${steps}`);
 
-  let stepWake = 0;
+  let stepWake = 1;
   
   // Set initial volume
   self.sendRestCommand(`/api/v1/commands/?cmd=volume&volume=${self.startVolume}`, function (err, response) {
@@ -711,7 +711,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
     }
   }
   // Start the volume increaseVolume process one more time
-  increaseVolume();
+  //increaseVolume();
 };
 
 SleepWakePlugin.prototype.getConfigurationFiles = function () {
