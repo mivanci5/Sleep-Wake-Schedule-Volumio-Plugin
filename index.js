@@ -321,13 +321,6 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
     return;
   }
 
-  // If sleepTime is before now, schedule for the next day
- // if (sleepTime <= now) {
- //   sleepTime.setDate(sleepTime.getDate() + 1);
- //   self.writeLog('Adjusted sleep time to next day: ' + sleepTime);
- // }
-  
- // If sleepTime is before now, schedule for the next day
   if (sleepTime <= now) {
     const nextDay = new Date(); // Stvori novi Date objekt
     nextDay.setDate(nextDay.getDate() + 1); // Postavi datum na sljedeći dan
@@ -545,7 +538,7 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
   const stepsSleep = Math.ceil(self.volumeDecrease); // dodano za proracun koraka po korisniku
   const intervalSleep = (self.minutesFade * 60 * 1000) / stepsSleep; //pretvoreno u milisekunde
   self.writeLog(`Number of sleeping volume steps calculated: ${stepsSleep}`);
-  let step = 0;
+  let step = 1;
   
   function decreaseVolume() {    
     try {
@@ -556,7 +549,7 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
         return; // Prekini ako je sleep proces prekinut
       }
       
-      if (step >= stepsSleep) {
+      if (step > stepsSleep) {
         self.logger.info('SleepWakePlugin - Fade out complete. Stopping playback.');
         self.writeLog('Fade out complete. Stopping playback.');
 
@@ -610,7 +603,7 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
   }
 
   // Start the volume decrease process one more time
-  decreaseVolume();
+  //decreaseVolume();
 };
 
 SleepWakePlugin.prototype.startPlaylist = function () {
