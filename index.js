@@ -321,18 +321,36 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
     return;
   }
 
+ // if (sleepTime <= now) {
+ //   const nextDay = new Date(); // Stvori novi Date objekt
+ //   nextDay.setDate(nextDay.getDate() + 1); // Postavi datum na sljedeći dan
+ //   nextDay.setHours(sleepTime.getHours());
+ //   nextDay.setMinutes(sleepTime.getMinutes());
+ //   nextDay.setSeconds(0);
+ //   nextDay.setMilliseconds(0);
+
+ //   self.writeLog(`Adjusted sleep time to next day: ${nextDay}`);
+ //   sleepTime.setTime(nextDay.getTime()); // Ažuriraj sleepTime s novim datumom i vremenom
+ // }
+  
+  // Ako je vrijeme spavanja već prošlo za trenutni dan, zakazujemo ga za sljedeći dan
   if (sleepTime <= now) {
-    const nextDay = new Date(); // Stvori novi Date objekt
-    nextDay.setDate(nextDay.getDate() + 1); // Postavi datum na sljedeći dan
-    nextDay.setHours(sleepTime.getHours());
-    nextDay.setMinutes(sleepTime.getMinutes());
-    nextDay.setSeconds(0);
-    nextDay.setMilliseconds(0);
+    sleepTime.setDate(sleepTime.getDate() + 1); // Povećavamo datum za jedan dan
+    dayOfWeek = (dayOfWeek + 1) % 7; // Ažuriramo dan u tjednu za sljedeći dan
 
-    self.writeLog(`Adjusted sleep time to next day: ${nextDay}`);
-    sleepTime.setTime(nextDay.getTime()); // Ažuriraj sleepTime s novim datumom i vremenom
+    // Ponovno postavljanje vremena za sljedeći dan prema ažuriranom danu
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Ponedjeljak do petak
+      sleepTimeStr = self.config.get('Mon_Fri_sleepTime') || '22:00';
+    } else if (dayOfWeek === 6) { // Subota
+      sleepTimeStr = self.config.get('Sat_sleepTime') || '22:00';
+    } else if (dayOfWeek === 0) { // Nedjelja
+      sleepTimeStr = self.config.get('Sun_sleepTime') || '22:00';
+    }
+
+    sleepTime = self.parseTime(sleepTimeStr);
+    sleepTime.setDate(now.getDate() + 1); // Ažuriramo datum za sljedeći dan
+    self.writeLog(`Adjusted sleep time to next day: ${sleepTime}`);
   }
-
 
   // Calculate the time until sleep starts (in milliseconds)
   const timeUntilSleep = sleepTime - now;
@@ -379,8 +397,21 @@ SleepWakePlugin.prototype.scheduleWake = function () {
 
   // If wakeTime is before now, schedule for the next day
   if (wakeTime <= now) {
-    wakeTime.setDate(wakeTime.getDate() + 1);
-    self.writeLog('Adjusted wake time to next day: ' + wakeTime);
+    wakeTime.setDate(wakeTime.getDate() + 1); // Povećavamo datum za jedan dan
+    dayOfWeek = (dayOfWeek + 1) % 7; // Ažuriramo dan u tjednu za sljedeći dan
+
+    // Ponovno postavljanje vremena za sljedeći dan prema ažuriranom danu
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Ponedjeljak do petak
+      wakeTimeStr = self.config.get('Mon_Fri_wakeTime') || '07:00';
+    } else if (dayOfWeek === 6) { // Subota
+      wakeTimeStr = self.config.get('Sat_wakeTime') || '07:00';
+    } else if (dayOfWeek === 0) { // Nedjelja
+      wakeTimeStr = self.config.get('Sun_wakeTime') || '07:00';
+    }
+
+    wakeTime = self.parseTime(wakeTimeStr);
+    wakeTime.setDate(now.getDate() + 1); // Ažuriramo datum za sljedeći dan
+    self.writeLog(`Adjusted wake time to next day: ${wakeTime}`);
   }
 
   // Calculate the time until wake starts (in milliseconds)
