@@ -124,11 +124,9 @@
         },
         {
           "id": "playlist",
-          "element": "input",
-          "type": "text",
+          "element": "select",
           "label": "Playlist Name",
-          "value": "",
-          "placeholder": "Enter playlist name"
+          "options": []
         },
         {
           "id": "volumeIncrease",
