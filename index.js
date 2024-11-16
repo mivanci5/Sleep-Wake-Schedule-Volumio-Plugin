@@ -120,6 +120,8 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       uiconf.sections[1].content[1].value = self.config.get('Sat_wakeTime') || '07:00';
       uiconf.sections[1].content[2].value = self.config.get('Sun_wakeTime') || '07:00';
       uiconf.sections[1].content[3].value = self.config.get('startVolume') || 20;
+      uiconf.sections[1].content[5].value = self.config.get('volumeIncrease') || 1;
+      uiconf.sections[1].content[6].value = self.config.get('minutesRamp') || 10;
 
 
       // Additional log to verify values retrieved from config
