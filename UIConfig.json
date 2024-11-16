@@ -125,12 +125,13 @@
         {
           "id": "playlist",
           "element": "select",
-          "type": "text",
           "label": "Playlist Name",
-          "options": [],
-          "value": "",
-          "placeholder": "Playlist name"
-        },
+          "value": {
+						"value": "Radio",
+						"label": "Radio"
+          },
+					"options": []
+        }, 
         {
           "id": "volumeIncrease",
           "element": "input",
