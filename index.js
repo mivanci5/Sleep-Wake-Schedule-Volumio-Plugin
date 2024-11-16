@@ -109,7 +109,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
     }
 
     try {
-      // Seting values for Mon-Fri, subotu i nedjelju
+      // Seting values for Mon-Fri, Satarday and Sunday
       uiconf.sections[0].content[0].value = self.config.get('Mon_Fri_sleepTime') || '22:00';
       uiconf.sections[0].content[1].value = self.config.get('Sat_sleepTime') || '22:00';
       uiconf.sections[0].content[2].value = self.config.get('Sun_sleepTime') || '22:00';
@@ -136,16 +136,16 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       self.writeLog('volumeIncrease: ' + uiconf.sections[1].content[5].value);
       self.writeLog('minutesRamp: ' + uiconf.sections[1].content[6].value);
 
-     // Dohvati trenutno spremljenu playlistu
+     // Get saved playlist from config.json
       const currentPlaylist = self.config.get('playlist');
 
-      // Dohvati popis playlista s Volumio API-ja
+      // Get playlist from Volumio API
       self.fetchPlaylists()
         .then((playlists) => {
-          // Postavi popis opcija u UI
+          // Set options in UI settings
           uiconf.sections[1].content[4].options = playlists;
 
-          // Ako je spremljena playlista postavljena, postavi je kao odabranu
+          // IF list from Config.json exist in volumio playlists, then set it for wake up
           if (currentPlaylist) {
             const selectedPlaylist = playlists.find(pl => pl.value === currentPlaylist);
             if (selectedPlaylist) {
@@ -237,9 +237,8 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
     }
   }
 
-// Save the playlist
+// Save the playlist as string 
 if (playlist !== undefined) {
-  // Ako je playlist objekt, uzmi njegov value; inače spremi izravno string
   const playlistName = typeof playlist === 'object' && playlist.value ? playlist.value : playlist;
   self.config.set('playlist', playlistName);
   self.writeLog('Set playlist to ' + playlistName);
@@ -378,11 +377,11 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
     const newDayOfWeek = nextDayForSleep.getDay();
     let newSleepTimeStr;
 
-    if (newDayOfWeek >= 1 && newDayOfWeek <= 5) { // Ponedjeljak do petak
+    if (newDayOfWeek >= 1 && newDayOfWeek <= 5) { // Monday to Friday
       newSleepTimeStr = self.config.get('Mon_Fri_sleepTime') || '22:00';
-    } else if (newDayOfWeek === 6) { // Subota
+    } else if (newDayOfWeek === 6) { // Saturday
       newSleepTimeStr = self.config.get('Sat_sleepTime') || '22:00';
-    } else if (newDayOfWeek === 0) { // Nedjelja
+    } else if (newDayOfWeek === 0) { // Sunday
       newSleepTimeStr = self.config.get('Sun_sleepTime') || '22:00';
     }
 
@@ -460,11 +459,11 @@ SleepWakePlugin.prototype.scheduleWake = function () {
     const newDayOfWeek = nextDayForWake.getDay();
     let newWakeTimeStr;
 
-    if (newDayOfWeek >= 1 && newDayOfWeek <= 5) { // Ponedjeljak do petak
+    if (newDayOfWeek >= 1 && newDayOfWeek <= 5) { // Monday to Friday
       newWakeTimeStr = self.config.get('Mon_Fri_wakeTime') || '07:00';
-    } else if (newDayOfWeek === 6) { // Subota
+    } else if (newDayOfWeek === 6) { // Saturday
       newWakeTimeStr = self.config.get('Sat_wakeTime') || '07:00';
-    } else if (newDayOfWeek === 0) { // Nedjelja
+    } else if (newDayOfWeek === 0) { // Sunday
       newWakeTimeStr = self.config.get('Sun_wakeTime') || '07:00';
     }
 
@@ -633,8 +632,8 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
   self.writeLog('Starting fade out volume');
 
  
-  const stepsSleep = Math.ceil(self.volumeDecrease); // dodano za proracun koraka po korisniku
-  const intervalSleep = (self.minutesFade * 60 * 1000) / stepsSleep; //pretvoreno u milisekunde
+  const stepsSleep = Math.ceil(self.volumeDecrease); 
+  const intervalSleep = (self.minutesFade * 60 * 1000) / stepsSleep; //set it in miliseconds
   self.writeLog(`Number of sleeping volume steps calculated: ${stepsSleep}`);
   let step = 1;
   
@@ -644,11 +643,11 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
 
   function decreaseVolume() {    
     try {
-          // **Proveri da li je `isSleeping` prekinut**
+          // **Check if `isSleeping` brake**
       if (!self.isSleeping) {
         self.logger.info('SleepWakePlugin - Fade out process interrupted.');
         self.writeLog('Fade out process interrupted.');
-        return; // Prekini ako je sleep proces prekinut
+        return; // stop the proces if it is brake
       }
       
       if (step > stepsSleep) {
@@ -704,8 +703,6 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
     }
   }
 
-  // Start the volume decrease process one more time
-  //decreaseVolume();
 };
 
 SleepWakePlugin.prototype.startPlaylist = function () {
@@ -805,8 +802,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
       self.isWaking = false;
     }
   }
-  // Start the volume increaseVolume process one more time
-  //increaseVolume();
+
 };
 
 SleepWakePlugin.prototype.getConfigurationFiles = function () {
@@ -831,22 +827,22 @@ SleepWakePlugin.prototype.writeLog = function (message) {
 };
 
 
-// Nova funkcija za kontrolu veličine log datoteke
+// check log file and delete if large
 SleepWakePlugin.prototype.manageLogSize = function () {
   const self = this;
 
   try {
-    // Provjera postoji li datoteka loga
+    // Check if file exist
     if (fs.existsSync(self.logFile)) {
-      // Dohvati informacije o datoteci loga
+      // get file data
       const stats = fs.statSync(self.logFile);
 
-      // Provjera veličine log datoteke
+      // check size of file
       if (stats.size > MAX_LOG_SIZE) {
-        // Ako je datoteka veća od 2 MB, obriši trenutnu datoteku
+        // delete file if larger then 2mb
         fs.unlinkSync(self.logFile);
         
-        // Započni novi log
+        // start new log
         self.writeLog('Log file exceeded 2 MB. Old log file deleted, new log started.');
       }
     }
@@ -856,6 +852,7 @@ SleepWakePlugin.prototype.manageLogSize = function () {
   }
 };
 
+// Get existing playlists from volumio API
 SleepWakePlugin.prototype.fetchPlaylists = function () {
   const self = this;
   return new Promise((resolve, reject) => {
