@@ -136,14 +136,22 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       self.writeLog('volumeIncrease: ' + uiconf.sections[1].content[5].value);
       self.writeLog('minutesRamp: ' + uiconf.sections[1].content[6].value);
 
-    // Dohvati playliste i ažuriraj select polje
-    self.fetchPlaylists()
-      .then((playlists) => {
-        uiconf.sections[1].content[4].options = playlists;
-        self.writeLog(`Playlists fetched successfully: ${JSON.stringify(playlists)}`);
+      // Dohvati playliste i ažuriraj select polje
+      self.fetchPlaylists()
+        .then((playlists) => {
+          uiconf.sections[1].content[4].options = playlists;
+          self.writeLog(`Playlists fetched successfully: ${JSON.stringify(playlists)}`);
+          
+          // Rješenje za zatvaranje bloka `then`
+          self.writeLog('UI configuration loaded successfully.');
+          defer.resolve(uiconf);
+        })
+        .catch((fetchError) => {
+          self.logger.error('Error fetching playlists: ' + fetchError);
+          self.writeLog('Error fetching playlists: ' + fetchError);
+          defer.resolve(uiconf); // Vraćamo uiconf čak i u slučaju greške
+        });
       
-      self.writeLog('UI configuration loaded successfully.');
-      defer.resolve(uiconf);
     } catch (parseError) {
       self.logger.error('SleepWakePlugin - Error parsing UIConfig.json: ' + parseError);
       self.writeLog('Error parsing UIConfig.json: ' + parseError);
@@ -153,6 +161,8 @@ SleepWakePlugin.prototype.getUIConfig = function () {
 
   return defer.promise;
 };
+
+
 
 // Save data to Config.json
 SleepWakePlugin.prototype.saveOptions = function (data) {
