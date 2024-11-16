@@ -158,7 +158,7 @@ Logs: Check the plugin log file (sleep-wake-plugin.log) located in the plugin's 
 _________________________________________________________________________________
 License
 
-This plugin is released under the MIT License.
+This plugin is released under the ISC License.
 
 
 _________________________________________________________________________________
