@@ -35,7 +35,7 @@ SleepWakePlugin.prototype.onVolumioStart = function () {
   const configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
   self.config = new (require('v-conf'))();
   self.config.loadFile(configFile);
-
+  self.writeLog('Config file path: ' + configFile);
   return libQ.resolve();
 };
 
