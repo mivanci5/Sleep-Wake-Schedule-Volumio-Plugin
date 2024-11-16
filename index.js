@@ -136,20 +136,35 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       self.writeLog('volumeIncrease: ' + uiconf.sections[1].content[5].value);
       self.writeLog('minutesRamp: ' + uiconf.sections[1].content[6].value);
 
+      // Postavljanje vrijednosti za polja iz config.json
+      uiconf.sections[1].content[4].value = self.config.get('playlist') || '';
+      self.writeLog('Loaded playlist from config: ' + uiconf.sections[1].content[4].value);
+
       // Dohvati playliste i ažuriraj select polje
       self.fetchPlaylists()
         .then((playlists) => {
           uiconf.sections[1].content[4].options = playlists;
-          self.writeLog(`Playlists fetched successfully: ${JSON.stringify(playlists)}`);
-          
-          // Rješenje za zatvaranje bloka `then`
-          self.writeLog('UI configuration loaded successfully.');
+
+          // Postavljanje trenutne vrijednosti ako postoji u konfiguraciji
+          const currentPlaylist = self.config.get('playlist');
+          if (currentPlaylist) {
+            const selectedPlaylist = playlists.find(pl => pl.value === currentPlaylist);
+            if (selectedPlaylist) {
+              uiconf.sections[1].content[4].value = selectedPlaylist.value;
+              self.writeLog(`Playlist found and set: ${selectedPlaylist.value}`);
+            } else {
+              self.writeLog(`Playlist not found in options, setting to default.`);
+              uiconf.sections[1].content[4].value = '';
+            }
+          }
+
+          self.writeLog('Playlists fetched and UI configuration updated.');
           defer.resolve(uiconf);
         })
         .catch((fetchError) => {
           self.logger.error('Error fetching playlists: ' + fetchError);
           self.writeLog('Error fetching playlists: ' + fetchError);
-          defer.resolve(uiconf); // Vraćamo uiconf čak i u slučaju greške
+          defer.resolve(uiconf);
         });
       
     } catch (parseError) {
@@ -224,18 +239,18 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
 
 // Save the playlist correctly as a string
 if (playlist && typeof playlist === 'object' && playlist.value) {
-    // Spremi samo `value` iz objekta ako je objekt
+    // Ako je objekt, spremi samo `value`
     const playlistValue = playlist.value;
     self.config.set('playlist', playlistValue);
     self.writeLog('Set playlist to ' + playlistValue);
-} else if (typeof playlist === 'string' && !playlist.includes('{')) {
-    // Ako je već string, direktno ga spremi samo ako nije objekt kao string
-    self.config.set('playlist', playlist);
+} else if (typeof playlist === 'string') {
+    // Ako je string, direktno ga spremi
+    self.config.set('playlist', playlist.trim());
     self.writeLog('Set playlist to ' + playlist);
 } else {
-    // Ako je u krivom formatu, logiraj grešku
-    self.writeLog('Playlist format is invalid: ' + JSON.stringify(playlist));
+    self.writeLog('Invalid playlist format received: ' + JSON.stringify(playlist));
 }
+
 
   
   if (volumeDecrease !== undefined) {
