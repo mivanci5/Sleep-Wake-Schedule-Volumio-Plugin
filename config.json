@@ -29,7 +29,7 @@
   },
   "playlist": {
     "type": "string",
-    "value": "wakeup"
+    "value": "Some Playlist You Made"
   },
   "volumeDecrease": {
     "type": "number",
