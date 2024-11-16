@@ -221,9 +221,12 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
       self.writeLog('Set startVolume to ' + volumeValue);
     }
   }
-  if (playlist !== undefined) {
-    self.config.set('playlist', playlist);
-    self.writeLog('Set playlist to ' + playlist);
+  // Ispravno spremanje playliste
+  if (playlist && typeof playlist === 'object' && playlist.value) {
+    self.config.set('playlist', playlist.value);
+    self.writeLog('Set playlist to ' + playlist.value);
+  } else {
+    self.writeLog('Playlist not set correctly: ' + JSON.stringify(playlist));
   }
   if (volumeDecrease !== undefined) {
     self.config.set('volumeDecrease', volumeDecrease);
