@@ -237,20 +237,11 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
     }
   }
 
-// Save the playlist correctly as a string
-if (playlist && typeof playlist === 'object' && playlist.value) {
-    // Ako je objekt, spremi samo `value`
-    const playlistValue = playlist.value;
-    self.config.set('playlist', playlistValue);
-    self.writeLog('Set playlist to ' + playlistValue);
-} else if (typeof playlist === 'string') {
-    // Ako je string, direktno ga spremi
-    self.config.set('playlist', playlist.trim());
+// Save the playlist
+  if (playlist !== undefined) {
+    self.config.set('playlist', playlist);
     self.writeLog('Set playlist to ' + playlist);
-} else {
-    self.writeLog('Invalid playlist format received: ' + JSON.stringify(playlist));
-}
-
+  }
 
   
   if (volumeDecrease !== undefined) {
