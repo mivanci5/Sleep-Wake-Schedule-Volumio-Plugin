@@ -224,9 +224,9 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
 
     // Spremanje playliste
     if (data['playlist']) {
-      // Provjera je li `playlist` objekt i dohvaćanje `value`
+      // Ako je `playlist` objekt, uzmi samo `value`
       const playlist = typeof data['playlist'] === 'object' ? data['playlist'].value : data['playlist'];
-      self.config.set('playlist', playlist);
+      self.config.set('playlist', String(playlist)); // Prisilno spremanje kao string
       self.writeLog('Set playlist to ' + playlist);
     }
   
@@ -294,8 +294,9 @@ SleepWakePlugin.prototype.loadConfig = function () {
   self.wakeTime_Sat = self.config.get('Sat_wakeTime') || '07:00';
   self.wakeTime_Sun = self.config.get('Sun_wakeTime') || '07:00';
   self.startVolume = parseInt(self.config.get('startVolume'), 10) || 20;
-   // Ispravno učitavanje playliste kao string
-  self.playlist = self.config.get('playlist') || '';
+  // Uvijek učitava `playlist` kao string
+  const savedPlaylist = self.config.get('playlist');
+  self.playlist = typeof savedPlaylist === 'string' ? savedPlaylist : String(savedPlaylist);
   self.writeLog('Loaded playlist: ' + self.playlist);
   
   self.volumeDecrease = parseInt(self.config.get('volumeDecrease'), 10) || 1;
