@@ -4,7 +4,8 @@
   "description": "Plugin for sleep and wake with volume fade out/in",
   "main": "index.js",
   "author": "Mario Ivancic",
-  "license": "MIT",
+  "license": "ISC",
+  "repository": "https://github.com/mivanci5/Sleep-Wake-Schedule-Volumio-Plugin",
   "dependencies": {
     "fs-extra": "^10.0.0",
     "kew": "^0.7.0",
