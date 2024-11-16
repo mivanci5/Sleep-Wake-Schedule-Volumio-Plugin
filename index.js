@@ -120,13 +120,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       uiconf.sections[1].content[1].value = self.config.get('Sat_wakeTime') || '07:00';
       uiconf.sections[1].content[2].value = self.config.get('Sun_wakeTime') || '07:00';
       uiconf.sections[1].content[3].value = self.config.get('startVolume') || 20;
-
-      // Dohvati trenutno spremljenu playlistu
-      const selectedPlaylist = self.config.get('playlist') || '';
-      uiconf.sections[1].content[4].value = selectedPlaylist;
-      
-      uiconf.sections[1].content[5].value = self.config.get('volumeIncrease') || 10;
-      uiconf.sections[1].content[6].value = self.config.get('minutesRamp') || 5;
+      uiconf.sections[1].content[4].value = self.config.get('playlist') || '';
 
       // Additional log to verify values retrieved from config
       self.writeLog('Configuration values loaded for UI: Mon_Fri_sleepTime: ' + uiconf.sections[0].content[0].value);
@@ -142,14 +136,11 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       self.writeLog('volumeIncrease: ' + uiconf.sections[1].content[5].value);
       self.writeLog('minutesRamp: ' + uiconf.sections[1].content[6].value);
 
-
-      // Dohvaćanje popisa playlista i ažuriranje select opcije
-      self.writeLog('Fetching available playlists...');
-      const playlists = await self.fetchPlaylists();
-
-      // Postavljanje opcija u select za playliste
-      uiconf.sections[1].content[4].options = playlists;
-      self.writeLog(`Playlists fetched: ${JSON.stringify(playlists)}`);
+    // Dohvati playliste i ažuriraj select polje
+    self.fetchPlaylists()
+      .then((playlists) => {
+        uiconf.sections[1].content[4].options = playlists;
+        self.writeLog(`Playlists fetched successfully: ${JSON.stringify(playlists)}`);
       
       self.writeLog('UI configuration loaded successfully.');
       defer.resolve(uiconf);
@@ -845,11 +836,12 @@ SleepWakePlugin.prototype.fetchPlaylists = function () {
       res.on('data', (chunk) => {
         data += chunk;
       });
+
       res.on('end', () => {
         try {
           const response = JSON.parse(data);
           const playlists = response.navigation.lists[0].items.map((item) => ({
-            value: item.uri,
+            value: item.title,
             label: item.title,
           }));
           resolve(playlists);
@@ -868,4 +860,5 @@ SleepWakePlugin.prototype.fetchPlaylists = function () {
     req.end();
   });
 };
+
 
