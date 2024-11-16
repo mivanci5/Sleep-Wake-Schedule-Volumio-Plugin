@@ -126,7 +126,9 @@
           "id": "playlist",
           "element": "select",
           "label": "Playlist Name",
-          "options": []
+          "options": [],
+          "value": "",
+          "placeholder": "Playlist name"
         },
         {
           "id": "volumeIncrease",
