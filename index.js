@@ -120,7 +120,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       uiconf.sections[1].content[1].value = self.config.get('Sat_wakeTime') || '07:00';
       uiconf.sections[1].content[2].value = self.config.get('Sun_wakeTime') || '07:00';
       uiconf.sections[1].content[3].value = self.config.get('startVolume') || 20;
-      uiconf.sections[1].content[4].value = self.config.get('playlist') || '';
+
 
       // Additional log to verify values retrieved from config
       self.writeLog('Configuration values loaded for UI: Mon_Fri_sleepTime: ' + uiconf.sections[0].content[0].value);
@@ -132,7 +132,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       self.writeLog('Sat_wakeTime: ' + uiconf.sections[1].content[1].value);
       self.writeLog('Sun_wakeTime: ' + uiconf.sections[1].content[2].value);
       self.writeLog('startVolume: ' + uiconf.sections[1].content[3].value);
-      self.writeLog('playlist: ' + uiconf.sections[1].content[4].value);
+
       self.writeLog('volumeIncrease: ' + uiconf.sections[1].content[5].value);
       self.writeLog('minutesRamp: ' + uiconf.sections[1].content[6].value);
 
