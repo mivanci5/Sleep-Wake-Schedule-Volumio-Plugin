@@ -237,14 +237,13 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
     }
   }
 
-// Save the playlist as string 
-if (playlist !== undefined) {
-  const playlistName = typeof playlist === 'object' && playlist.value ? playlist.value : playlist;
-  self.config.set('playlist', playlistName);
-  self.writeLog('Set playlist to ' + playlistName);
-}
+    // Save the playlist as string 
+  if (playlist !== undefined) {
+    const playlistName = typeof playlist === 'object' && playlist.value ? playlist.value : playlist;
+    self.config.set('playlist', playlistName);
+    self.writeLog('Set playlist to ' + playlistName);
+  }
 
-  
   if (volumeDecrease !== undefined) {
     self.config.set('volumeDecrease', volumeDecrease);
     self.writeLog('Set volumeDecrease to ' + volumeDecrease);
