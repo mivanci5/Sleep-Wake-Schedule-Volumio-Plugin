@@ -120,7 +120,11 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       uiconf.sections[1].content[1].value = self.config.get('Sat_wakeTime') || '07:00';
       uiconf.sections[1].content[2].value = self.config.get('Sun_wakeTime') || '07:00';
       uiconf.sections[1].content[3].value = self.config.get('startVolume') || 20;
-      uiconf.sections[1].content[4].value = self.config.get('playlist') || 'wakeup';
+
+      // Dohvati trenutno spremljenu playlistu
+      const selectedPlaylist = self.config.get('playlist') || '';
+      uiconf.sections[1].content[4].value = selectedPlaylist;
+      
       uiconf.sections[1].content[5].value = self.config.get('volumeIncrease') || 10;
       uiconf.sections[1].content[6].value = self.config.get('minutesRamp') || 5;
 
@@ -138,6 +142,15 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       self.writeLog('volumeIncrease: ' + uiconf.sections[1].content[5].value);
       self.writeLog('minutesRamp: ' + uiconf.sections[1].content[6].value);
 
+
+      // Dohvaćanje popisa playlista i ažuriranje select opcije
+      self.writeLog('Fetching available playlists...');
+      const playlists = await self.fetchPlaylists();
+
+      // Postavljanje opcija u select za playliste
+      uiconf.sections[1].content[4].options = playlists;
+      self.writeLog(`Playlists fetched: ${JSON.stringify(playlists)}`);
+      
       self.writeLog('UI configuration loaded successfully.');
       defer.resolve(uiconf);
     } catch (parseError) {
@@ -816,3 +829,43 @@ SleepWakePlugin.prototype.manageLogSize = function () {
     self.writeLog('Error managing log file size: ' + error);
   }
 };
+
+SleepWakePlugin.prototype.fetchPlaylists = function () {
+  const self = this;
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'localhost',
+      port: 3000,
+      path: '/api/v1/browse?uri=playlists',
+      method: 'GET',
+    };
+
+    const req = http.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        try {
+          const response = JSON.parse(data);
+          const playlists = response.navigation.lists[0].items.map((item) => ({
+            value: item.uri,
+            label: item.title,
+          }));
+          resolve(playlists);
+        } catch (error) {
+          self.writeLog('Error parsing playlist data: ' + error);
+          reject(error);
+        }
+      });
+    });
+
+    req.on('error', (e) => {
+      self.writeLog('Error fetching playlists: ' + e.message);
+      reject(e);
+    });
+
+    req.end();
+  });
+};
+
