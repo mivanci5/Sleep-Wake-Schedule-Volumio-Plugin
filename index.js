@@ -136,29 +136,29 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       self.writeLog('volumeIncrease: ' + uiconf.sections[1].content[5].value);
       self.writeLog('minutesRamp: ' + uiconf.sections[1].content[6].value);
 
-      // Postavljanje vrijednosti za polja iz config.json
-      uiconf.sections[1].content[4].value = self.config.get('playlist') || '';
-      self.writeLog('Loaded playlist from config: ' + uiconf.sections[1].content[4].value);
+     // Dohvati trenutno spremljenu playlistu
+      const currentPlaylist = self.config.get('playlist');
 
-      // Dohvati playliste i ažuriraj select polje
+      // Dohvati popis playlista s Volumio API-ja
       self.fetchPlaylists()
         .then((playlists) => {
+          // Postavi popis opcija u UI
           uiconf.sections[1].content[4].options = playlists;
 
-          // Postavljanje trenutne vrijednosti ako postoji u konfiguraciji
-          const currentPlaylist = self.config.get('playlist');
+          // Ako je spremljena playlista postavljena, postavi je kao odabranu
           if (currentPlaylist) {
             const selectedPlaylist = playlists.find(pl => pl.value === currentPlaylist);
             if (selectedPlaylist) {
-              uiconf.sections[1].content[4].value = selectedPlaylist.value;
+              uiconf.sections[1].content[4].value = selectedPlaylist;
               self.writeLog(`Playlist found and set: ${selectedPlaylist.value}`);
             } else {
               self.writeLog(`Playlist not found in options, setting to default.`);
-              uiconf.sections[1].content[4].value = '';
+              uiconf.sections[1].content[4].value = { value: '', label: '' };
             }
+          } else {
+            uiconf.sections[1].content[4].value = { value: '', label: 'Select a playlist' };
           }
 
-          self.writeLog('Playlists fetched and UI configuration updated.');
           defer.resolve(uiconf);
         })
         .catch((fetchError) => {
@@ -238,10 +238,12 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
   }
 
 // Save the playlist
-  if (playlist !== undefined) {
-    self.config.set('playlist', playlist);
-    self.writeLog('Set playlist to ' + playlist);
-  }
+if (playlist !== undefined) {
+  // Ako je playlist objekt, uzmi njegov value; inače spremi izravno string
+  const playlistName = typeof playlist === 'object' && playlist.value ? playlist.value : playlist;
+  self.config.set('playlist', playlistName);
+  self.writeLog('Set playlist to ' + playlistName);
+}
 
   
   if (volumeDecrease !== undefined) {
