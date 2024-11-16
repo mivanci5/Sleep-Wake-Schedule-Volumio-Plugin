@@ -35,7 +35,7 @@ SleepWakePlugin.prototype.onVolumioStart = function () {
   const configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
   self.config = new (require('v-conf'))();
   self.config.loadFile(configFile);
-
+  self.writeLog('Config file path: ' + configFile);
   return libQ.resolve();
 };
 
@@ -109,7 +109,7 @@ SleepWakePlugin.prototype.getUIConfig = function () {
     }
 
     try {
-      // Seting values for Mon-Fri, subotu i nedjelju
+      // Seting values for Mon-Fri, Satarday and Sunday
       uiconf.sections[0].content[0].value = self.config.get('Mon_Fri_sleepTime') || '22:00';
       uiconf.sections[0].content[1].value = self.config.get('Sat_sleepTime') || '22:00';
       uiconf.sections[0].content[2].value = self.config.get('Sun_sleepTime') || '22:00';
@@ -120,9 +120,9 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       uiconf.sections[1].content[1].value = self.config.get('Sat_wakeTime') || '07:00';
       uiconf.sections[1].content[2].value = self.config.get('Sun_wakeTime') || '07:00';
       uiconf.sections[1].content[3].value = self.config.get('startVolume') || 20;
-      uiconf.sections[1].content[4].value = self.config.get('playlist') || 'wakeup';
-      uiconf.sections[1].content[5].value = self.config.get('volumeIncrease') || 10;
-      uiconf.sections[1].content[6].value = self.config.get('minutesRamp') || 5;
+      uiconf.sections[1].content[5].value = self.config.get('volumeIncrease') || 1;
+      uiconf.sections[1].content[6].value = self.config.get('minutesRamp') || 10;
+
 
       // Additional log to verify values retrieved from config
       self.writeLog('Configuration values loaded for UI: Mon_Fri_sleepTime: ' + uiconf.sections[0].content[0].value);
@@ -134,12 +134,41 @@ SleepWakePlugin.prototype.getUIConfig = function () {
       self.writeLog('Sat_wakeTime: ' + uiconf.sections[1].content[1].value);
       self.writeLog('Sun_wakeTime: ' + uiconf.sections[1].content[2].value);
       self.writeLog('startVolume: ' + uiconf.sections[1].content[3].value);
-      self.writeLog('playlist: ' + uiconf.sections[1].content[4].value);
+
       self.writeLog('volumeIncrease: ' + uiconf.sections[1].content[5].value);
       self.writeLog('minutesRamp: ' + uiconf.sections[1].content[6].value);
 
-      self.writeLog('UI configuration loaded successfully.');
-      defer.resolve(uiconf);
+     // Get saved playlist from config.json
+      const currentPlaylist = self.config.get('playlist');
+
+      // Get playlist from Volumio API
+      self.fetchPlaylists()
+        .then((playlists) => {
+          // Set options in UI settings
+          uiconf.sections[1].content[4].options = playlists;
+
+          // IF list from Config.json exist in volumio playlists, then set it for wake up
+          if (currentPlaylist) {
+            const selectedPlaylist = playlists.find(pl => pl.value === currentPlaylist);
+            if (selectedPlaylist) {
+              uiconf.sections[1].content[4].value = selectedPlaylist;
+              self.writeLog(`Playlist found and set: ${selectedPlaylist.value}`);
+            } else {
+              self.writeLog(`Playlist not found in options, setting to default.`);
+              uiconf.sections[1].content[4].value = { value: '', label: '' };
+            }
+          } else {
+            uiconf.sections[1].content[4].value = { value: '', label: 'Select a playlist' };
+          }
+
+          defer.resolve(uiconf);
+        })
+        .catch((fetchError) => {
+          self.logger.error('Error fetching playlists: ' + fetchError);
+          self.writeLog('Error fetching playlists: ' + fetchError);
+          defer.resolve(uiconf);
+        });
+      
     } catch (parseError) {
       self.logger.error('SleepWakePlugin - Error parsing UIConfig.json: ' + parseError);
       self.writeLog('Error parsing UIConfig.json: ' + parseError);
@@ -149,6 +178,8 @@ SleepWakePlugin.prototype.getUIConfig = function () {
 
   return defer.promise;
 };
+
+
 
 // Save data to Config.json
 SleepWakePlugin.prototype.saveOptions = function (data) {
@@ -207,10 +238,14 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
       self.writeLog('Set startVolume to ' + volumeValue);
     }
   }
+
+    // Save the playlist as string 
   if (playlist !== undefined) {
-    self.config.set('playlist', playlist);
-    self.writeLog('Set playlist to ' + playlist);
+    const playlistName = typeof playlist === 'object' && playlist.value ? playlist.value : playlist;
+    self.config.set('playlist', playlistName);
+    self.writeLog('Set playlist to ' + playlistName);
   }
+
   if (volumeDecrease !== undefined) {
     self.config.set('volumeDecrease', volumeDecrease);
     self.writeLog('Set volumeDecrease to ' + volumeDecrease);
@@ -275,7 +310,11 @@ SleepWakePlugin.prototype.loadConfig = function () {
   self.wakeTime_Sat = self.config.get('Sat_wakeTime') || '07:00';
   self.wakeTime_Sun = self.config.get('Sun_wakeTime') || '07:00';
   self.startVolume = parseInt(self.config.get('startVolume'), 10) || 20;
-  self.playlist = self.config.get('playlist') || '';
+  // Uvijek učitava `playlist` kao string
+  const savedPlaylist = self.config.get('playlist');
+  self.playlist = typeof savedPlaylist === 'string' ? savedPlaylist : String(savedPlaylist);
+  self.writeLog('Loaded playlist: ' + self.playlist);
+  
   self.volumeDecrease = parseInt(self.config.get('volumeDecrease'), 10) || 1;
   self.minutesFade = parseInt(self.config.get('minutesFade'), 10) || 10;
   self.volumeIncrease = parseInt(self.config.get('volumeIncrease'), 10) || 1;
@@ -339,11 +378,11 @@ SleepWakePlugin.prototype.scheduleSleep = function () {
     const newDayOfWeek = nextDayForSleep.getDay();
     let newSleepTimeStr;
 
-    if (newDayOfWeek >= 1 && newDayOfWeek <= 5) { // Ponedjeljak do petak
+    if (newDayOfWeek >= 1 && newDayOfWeek <= 5) { // Monday to Friday
       newSleepTimeStr = self.config.get('Mon_Fri_sleepTime') || '22:00';
-    } else if (newDayOfWeek === 6) { // Subota
+    } else if (newDayOfWeek === 6) { // Saturday
       newSleepTimeStr = self.config.get('Sat_sleepTime') || '22:00';
-    } else if (newDayOfWeek === 0) { // Nedjelja
+    } else if (newDayOfWeek === 0) { // Sunday
       newSleepTimeStr = self.config.get('Sun_sleepTime') || '22:00';
     }
 
@@ -421,11 +460,11 @@ SleepWakePlugin.prototype.scheduleWake = function () {
     const newDayOfWeek = nextDayForWake.getDay();
     let newWakeTimeStr;
 
-    if (newDayOfWeek >= 1 && newDayOfWeek <= 5) { // Ponedjeljak do petak
+    if (newDayOfWeek >= 1 && newDayOfWeek <= 5) { // Monday to Friday
       newWakeTimeStr = self.config.get('Mon_Fri_wakeTime') || '07:00';
-    } else if (newDayOfWeek === 6) { // Subota
+    } else if (newDayOfWeek === 6) { // Saturday
       newWakeTimeStr = self.config.get('Sat_wakeTime') || '07:00';
-    } else if (newDayOfWeek === 0) { // Nedjelja
+    } else if (newDayOfWeek === 0) { // Sunday
       newWakeTimeStr = self.config.get('Sun_wakeTime') || '07:00';
     }
 
@@ -594,8 +633,8 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
   self.writeLog('Starting fade out volume');
 
  
-  const stepsSleep = Math.ceil(self.volumeDecrease); // dodano za proracun koraka po korisniku
-  const intervalSleep = (self.minutesFade * 60 * 1000) / stepsSleep; //pretvoreno u milisekunde
+  const stepsSleep = Math.ceil(self.volumeDecrease); 
+  const intervalSleep = (self.minutesFade * 60 * 1000) / stepsSleep; //set it in miliseconds
   self.writeLog(`Number of sleeping volume steps calculated: ${stepsSleep}`);
   let step = 1;
   
@@ -605,11 +644,11 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
 
   function decreaseVolume() {    
     try {
-          // **Proveri da li je `isSleeping` prekinut**
+          // **Check if `isSleeping` brake**
       if (!self.isSleeping) {
         self.logger.info('SleepWakePlugin - Fade out process interrupted.');
         self.writeLog('Fade out process interrupted.');
-        return; // Prekini ako je sleep proces prekinut
+        return; // stop the proces if it is brake
       }
       
       if (step > stepsSleep) {
@@ -665,8 +704,6 @@ SleepWakePlugin.prototype.fadeOutVolume = function () {
     }
   }
 
-  // Start the volume decrease process one more time
-  //decreaseVolume();
 };
 
 SleepWakePlugin.prototype.startPlaylist = function () {
@@ -766,8 +803,7 @@ SleepWakePlugin.prototype.startPlaylist = function () {
       self.isWaking = false;
     }
   }
-  // Start the volume increaseVolume process one more time
-  //increaseVolume();
+
 };
 
 SleepWakePlugin.prototype.getConfigurationFiles = function () {
@@ -792,22 +828,22 @@ SleepWakePlugin.prototype.writeLog = function (message) {
 };
 
 
-// Nova funkcija za kontrolu veličine log datoteke
+// check log file and delete if large
 SleepWakePlugin.prototype.manageLogSize = function () {
   const self = this;
 
   try {
-    // Provjera postoji li datoteka loga
+    // Check if file exist
     if (fs.existsSync(self.logFile)) {
-      // Dohvati informacije o datoteci loga
+      // get file data
       const stats = fs.statSync(self.logFile);
 
-      // Provjera veličine log datoteke
+      // check size of file
       if (stats.size > MAX_LOG_SIZE) {
-        // Ako je datoteka veća od 2 MB, obriši trenutnu datoteku
+        // delete file if larger then 2mb
         fs.unlinkSync(self.logFile);
         
-        // Započni novi log
+        // start new log
         self.writeLog('Log file exceeded 2 MB. Old log file deleted, new log started.');
       }
     }
@@ -816,3 +852,46 @@ SleepWakePlugin.prototype.manageLogSize = function () {
     self.writeLog('Error managing log file size: ' + error);
   }
 };
+
+// Get existing playlists from volumio API
+SleepWakePlugin.prototype.fetchPlaylists = function () {
+  const self = this;
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'localhost',
+      port: 3000,
+      path: '/api/v1/browse?uri=playlists',
+      method: 'GET',
+    };
+
+    const req = http.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      res.on('end', () => {
+        try {
+          const response = JSON.parse(data);
+          const playlists = response.navigation.lists[0].items.map((item) => ({
+            value: item.title,
+            label: item.title,
+          }));
+          resolve(playlists);
+        } catch (error) {
+          self.writeLog('Error parsing playlist data: ' + error);
+          reject(error);
+        }
+      });
+    });
+
+    req.on('error', (e) => {
+      self.writeLog('Error fetching playlists: ' + e.message);
+      reject(e);
+    });
+
+    req.end();
+  });
+};
+
+
