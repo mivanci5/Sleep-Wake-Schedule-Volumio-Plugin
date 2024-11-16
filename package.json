@@ -27,7 +27,7 @@
     "os": [
       "buster"
     ],
-    "details": "Plugin for sleep and wake with volume fade out/in",
-    "changelog": "Prva verzija za Volumio 3."
+    "details": "Plugin for sleep and wake with volume fade out/in. Scheduling by workdays and weekend.",
+    "changelog": "First version"
   }
 }
