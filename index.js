@@ -222,12 +222,13 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
     }
   }
 
-  // Spremanje playliste
-  if (data['playlist']) {
-    const playlist = typeof data['playlist'] === 'object' ? data['playlist'].value : data['playlist'];
-    self.config.set('playlist', playlist);
-    self.writeLog('Set playlist to ' + playlist);
-  }
+    // Spremanje playliste
+    if (data['playlist']) {
+      // Provjera je li `playlist` objekt i dohvaćanje `value`
+      const playlist = typeof data['playlist'] === 'object' ? data['playlist'].value : data['playlist'];
+      self.config.set('playlist', playlist);
+      self.writeLog('Set playlist to ' + playlist);
+    }
   
   if (volumeDecrease !== undefined) {
     self.config.set('volumeDecrease', volumeDecrease);
