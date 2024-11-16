@@ -222,18 +222,19 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
     }
   }
 
-    // Spremanje playliste
-    if (data['playlist']) {
-      // Ako je `playlist` objekt, uzmi samo `value`, inače koristi kao string
-      let playlistValue = '';
-      if (typeof data['playlist'] === 'object' && data['playlist'] !== null) {
-        playlistValue = data['playlist'].value;
-      } else {
-        playlistValue = data['playlist'];
-      }
-      self.config.set('playlist', String(playlistValue)); // Spremi kao string
-      self.writeLog('Set playlist to ' + playlistValue);
-    }
+// Save the playlist correctly as a string
+if (playlist && typeof playlist === 'object' && playlist.value) {
+    // Spremi samo `value` iz objekta
+    self.config.set('playlist', playlist.value);
+    self.writeLog('Set playlist to ' + playlist.value);
+} else if (typeof playlist === 'string') {
+    // Ako je već string, direktno ga spremi
+    self.config.set('playlist', playlist);
+    self.writeLog('Set playlist to ' + playlist);
+} else {
+    self.writeLog('Playlist not set correctly: ' + JSON.stringify(playlist));
+}
+
   
   if (volumeDecrease !== undefined) {
     self.config.set('volumeDecrease', volumeDecrease);
