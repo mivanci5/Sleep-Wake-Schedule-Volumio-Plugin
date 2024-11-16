@@ -224,15 +224,17 @@ SleepWakePlugin.prototype.saveOptions = function (data) {
 
 // Save the playlist correctly as a string
 if (playlist && typeof playlist === 'object' && playlist.value) {
-    // Spremi samo `value` iz objekta
-    self.config.set('playlist', playlist.value);
-    self.writeLog('Set playlist to ' + playlist.value);
-} else if (typeof playlist === 'string') {
-    // Ako je već string, direktno ga spremi
+    // Spremi samo `value` iz objekta ako je objekt
+    const playlistValue = playlist.value;
+    self.config.set('playlist', playlistValue);
+    self.writeLog('Set playlist to ' + playlistValue);
+} else if (typeof playlist === 'string' && !playlist.includes('{')) {
+    // Ako je već string, direktno ga spremi samo ako nije objekt kao string
     self.config.set('playlist', playlist);
     self.writeLog('Set playlist to ' + playlist);
 } else {
-    self.writeLog('Playlist not set correctly: ' + JSON.stringify(playlist));
+    // Ako je u krivom formatu, logiraj grešku
+    self.writeLog('Playlist format is invalid: ' + JSON.stringify(playlist));
 }
 
   
