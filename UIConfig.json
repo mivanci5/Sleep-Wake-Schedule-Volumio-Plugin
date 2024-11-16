@@ -127,10 +127,10 @@
           "element": "select",
           "label": "Playlist Name",
           "value": {
-						"value": "Radio",
-						"label": "Radio"
+		"value": "Radio",
+		"label": "Radio"
           },
-					"options": []
+	"options": []
         }, 
         {
           "id": "volumeIncrease",
