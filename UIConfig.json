@@ -125,6 +125,7 @@
         {
           "id": "playlist",
           "element": "select",
+          "type": "text",
           "label": "Playlist Name",
           "options": [],
           "value": "",
