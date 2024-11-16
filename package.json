@@ -1,7 +1,7 @@
 {
   "name": "SleepWakePlugin",
   "version": "1.0.1",
-  "description": "Plugin for sleep and wake with volume fade out/in. Scheduling by workdays and weekend.",
+  "description": "Plugin for sleep and wake with volume fade out/Rump up. Scheduling by workdays and weekend.",
   "main": "index.js",
   "author": "Mario Ivancic",
   "license": "ISC",
@@ -27,7 +27,7 @@
     "os": [
       "buster"
     ],
-    "details": "Plugin for sleep and wake with volume fade out/in. Scheduling by workdays and weekend.",
+    "details": "Plugin for sleep and wake with volume fade out/Rump up. Scheduling by workdays and weekend.",
     "changelog": "First version"
   }
 }
