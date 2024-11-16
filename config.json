@@ -1,19 +1,19 @@
 {
   "Mon_Fri_sleepTime": {
     "type": "string",
-    "value": "02:00"
+    "value": "00:01"
   },
   "Sat_sleepTime": {
     "type": "string",
-    "value": "02:00"
+    "value": "01:00"
   },
   "Sun_sleepTime": {
     "type": "string",
-    "value": "02:00"
+    "value": "01:00"
   },
   "Mon_Fri_wakeTime": {
     "type": "string",
-    "value": "07:00"
+    "value": "06:00"
   },
   "Sat_wakeTime": {
     "type": "string",
@@ -37,7 +37,7 @@
   },
   "minutesFade": {
     "type": "number",
-    "value": 5
+    "value": 60
   },
   "volumeIncrease": {
     "type": "number",
@@ -45,6 +45,6 @@
   },
   "minutesRamp": {
     "type": "number",
-    "value": 5
+    "value": 30
   }
 }
